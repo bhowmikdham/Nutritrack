@@ -39,11 +39,11 @@ class Questionnaire : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             NutritrackTheme {
-                        FoodIntakeQuestionnaire()
-                }
+                FoodIntakeQuestionnaire()
             }
         }
     }
+}
 
 @Preview(showBackground = true)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -213,11 +213,17 @@ fun FoodIntakeQuestionnaire() {
                             colors = CheckboxDefaults.colors( checkedColor = Color(0xFF545454)
                             )
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.wiadth(4.dp))
                         Text("Nuts/Seeds")
                     }
                 }
             }
+        Text("Your Persona", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text("People can be broadly classified into 6 different types based on their eating preferences. Click on each button below to find out the different types, and select the type that best fits you!", fontSize = 12.sp)
+            Spacer(modifier=Modifier.padding(10.dp))
+            Text("Which persona suits you the best?", fontSize=16.sp, fontWeight = FontWeight.Bold)
+
         }
+
     }
 }
