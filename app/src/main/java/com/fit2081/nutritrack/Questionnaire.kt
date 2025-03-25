@@ -213,13 +213,35 @@ fun FoodIntakeQuestionnaire() {
                             colors = CheckboxDefaults.colors( checkedColor = Color(0xFF545454)
                             )
                         )
-                        Spacer(modifier = Modifier.wiadth(4.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
                         Text("Nuts/Seeds")
                     }
                 }
             }
+            //Persona Implementation
+            //My Approach
+            /**
+             *Text - Persona Heading ("Your Persona")
+             *subText - explaing persona (small font size)
+             * space
+             * state for the modals
+             * make a list for iteraiton(persona headings mapped to their descriptions)
+             * make a general modal loop , which loops on the list of modals
+             */
+
         Text("Your Persona", fontSize = 16.sp, fontWeight = FontWeight.Bold)
             Text("People can be broadly classified into 6 different types based on their eating preferences. Click on each button below to find out the different types, and select the type that best fits you!", fontSize = 12.sp)
+            Spacer(modifier = Modifier.height(10.dp))
+            //State
+            var showPersonaDialog by remember { mutableStateOf(false) }
+            var selectedPersona by remember { mutableStateOf<Pair<String, String>?>(null) }
+
+            //List for iteration (persona headings mapped to their description)
+            val personas = listOf(
+                "Health Devotee" to ""
+            )
+
+
             Spacer(modifier=Modifier.padding(10.dp))
             Text("Which persona suits you the best?", fontSize=16.sp, fontWeight = FontWeight.Bold)
 
