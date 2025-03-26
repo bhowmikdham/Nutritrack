@@ -469,13 +469,13 @@ fun DropDownPersona() {
             modifier = Modifier.fillMaxWidth()
         )
         {
-            for (persona in personas)
+            for (persona in personas) {
                 DropdownMenuItem(
                     text = { Text(persona) },
                     onClick = {
                         selectedPersona = persona
                         expanded = false
-                    })
+                    })}
 
         }}}
 
