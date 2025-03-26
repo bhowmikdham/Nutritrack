@@ -31,60 +31,15 @@ class Dashboard : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             NutritrackTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    OutlinedTextFieldDropdownMenuExample(modifier = Modifier.padding(innerPadding))
+                    HomePage()
                 }
             }
         }
     }
-}
+
 
 @Preview(showBackground = true)
 @Composable
-fun OutlinedTextFieldDropdownMenuExample(modifier: Modifier = Modifier) {
-    var expanded by remember { mutableStateOf(false) }
-    var selectedText by remember { mutableStateOf("") }
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        // Wrap OutlinedTextField inside Box to make it clickable
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { expanded = true } // Clicking anywhere in the box will open the dropdown
-        ) {
-            OutlinedTextField(
-                value = selectedText,
-                onValueChange = {},
-                readOnly = true, // Prevents manual text input
-                label = { Text("Select an option") },
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-
-        // The DropdownMenu appears when expanded is true
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            DropdownMenuItem(
-                text = { Text("Option 1") },
-                onClick = {
-                    selectedText = "Option 1"
-                    expanded = false
+fun HomePage() {
+    Box()
                 }
-            )
-            DropdownMenuItem(
-                text = { Text("Option 2") },
-                onClick = {
-                    selectedText = "Option 2"
-                    expanded = false
-                }
-            )
-        }
-    }
-}

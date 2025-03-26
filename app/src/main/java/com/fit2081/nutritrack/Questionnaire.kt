@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.startActivity
 import com.fit2081.nutritrack.ui.theme.NutritrackTheme
 
 
@@ -506,7 +507,19 @@ class Questionnaire : ComponentActivity() {
             }
 
 
+            Button(
+                shape = RoundedCornerShape(10.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                onClick = {
+                    context.startActivity(Intent(context,Dashboard::class.java))
+                }
 
+
+            ){Text("Save And Continue")
+
+            }
             }
 
     }}
