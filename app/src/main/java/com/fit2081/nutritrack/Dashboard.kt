@@ -50,7 +50,7 @@ class Dashboard : ComponentActivity() {
 fun HomePage() {
     val context = LocalContext.current
     val sharedPrefs = context.getSharedPreferences("my_prefs", Context.MODE_PRIVATE)
-    val user = sharedPrefs.getString( "user_id" , "") ?: "User"
+    val user = sharedPrefs.getString( "user_id" , "")
     Scaffold {
         innerPadding ->
         Column(
@@ -60,7 +60,7 @@ fun HomePage() {
                 .padding(16.dp)
         ){
             Text("Hello,", fontSize = 25.sp, fontWeight = FontWeight.Medium, color=Color.Gray)
-            Text(user,color=Color.Black)
+            Text("$user",color=Color.Black)
         }
     }
 }
