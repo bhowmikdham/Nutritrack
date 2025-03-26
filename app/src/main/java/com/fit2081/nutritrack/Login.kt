@@ -177,7 +177,6 @@ fun LoginScreen(modifier: Modifier = Modifier) {
                     OutlinedTextField(
                         value = userId,
                         onValueChange = { userId = it },
-                        readOnly = true,
                         label = { Text("My ID (Provided by your Clinician)") },
                         trailingIcon = {
                             ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
