@@ -39,6 +39,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -94,8 +95,22 @@ fun HomePage() {
                onClick = {context.startActivity(Intent(context,Insights::class.java))},
                 colors = ButtonDefaults.buttonColors(Color.White)
                ){Text("See all Scores", color = Color.Gray)}}}
+            Row(
 
-                Spacer(modifier=Modifier.height(100.dp))
+            ){
+                Box (
+                    modifier = Modifier.weight(1f),
+                    contentAlignment = Alignment.CenterStart
+                )
+                {
+                    Image(
+                        painter = painterResource(id = R.drawable.greenarrow),
+                        contentDescription = "Green Arrow",
+                        modifier = Modifier.size(130.dp),
+                    )
+                }
+
+            }
             Text("What is The Food Quality Score?", fontSize = 15.sp ,fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(10.dp))
             Text("Your Food Quality Score provides a snapshot of how well your eating patterns align with established food guidelines, helping you identify both strengths and opportunities for improvement in your diet.", fontSize = 12.sp, fontWeight = FontWeight.Medium, lineHeight = 17.sp)
