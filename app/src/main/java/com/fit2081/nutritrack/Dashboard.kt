@@ -27,7 +27,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.fit2081.nutritrack.ui.theme.NutritrackTheme
-
+import kotlin.math.floor
 class Dashboard : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,14 +60,12 @@ fun getUserHIEFAScore(context: Context, userId: String): String? {
                     return@forEach
                 }
                 val tokens = line.split(",")
-                // Check for enough columns (at least 5: phone, id, sex, male score, female score)
-                if (tokens.size >= 5) {
-                    val csvUserId = tokens[1].trim()
+                val csvUserId = tokens[1].trim()
                     if (csvUserId == userId) {
                         val sex = tokens[2].trim()
-                        return if (sex == "male") {
+                        return if (sex == "Male") {
                             tokens[3].trim() // Male_HIEFA_Score
-                        } else if (sex == "female") {
+                        } else if (sex == "Female") {
                             tokens[4].trim() // Female_HIEFA_Score
                         } else {
                             null
@@ -75,7 +73,6 @@ fun getUserHIEFAScore(context: Context, userId: String): String? {
                     }
                 }
             }
-        }
     } catch (e: Exception) {
         e.printStackTrace()
     }
@@ -88,7 +85,18 @@ fun HomePage() {
     val context = LocalContext.current
     val sharedPrefs = context.getSharedPreferences("my_prefs", Context.MODE_PRIVATE)
     val user = sharedPrefs.getString("user_id", "")
-    val userHIEFAScore = getUserHIEFAScore(context, user.toString())
+    val userHIEFAScore = getUserHIEFAScore(context, user.toString())?.toDoubleOrNull() ?: 0.0
+    val scoreint = userHIEFAScore.toInt()
+    // making up a value which stores the cuurent picture of the arrow to show
+    val arrow = if (scoreint>= 80) {
+        R.drawable.greenarrow
+    }
+    else if (scoreint in 60 until 80) {
+        R.drawable.yellowarrow
+    }
+    else {
+        R.drawable.redarrow
+    }
     Scaffold(containerColor = Color.White) { innerPadding ->
         Column(
             modifier = Modifier
@@ -123,13 +131,13 @@ fun HomePage() {
             Row {
                 Column {
                     Image(
-                        painter = painterResource(id = R.drawable.greenarrow),
+                        painter = painterResource(id = arrow),
                         contentDescription = "Green Arrow",
-                        modifier = Modifier.size(100.dp)
+                        modifier = Modifier.size(90.dp)
                     )
                 }
                 Column(
-                    modifier = Modifier.height(100.dp),
+                    modifier = Modifier.height(90.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
@@ -139,10 +147,27 @@ fun HomePage() {
                     ) {
                         Text(
                             "Your Food Quality Score",
-                            fontSize = 15.sp,
+                            fontSize = 13.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
+                }
+                Column(modifier = Modifier.
+                    height(90.dp)
+                    .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center)
+                {
+                    val color = if (scoreint >= 80) {
+                        Color.Green
+                    } else if (scoreint in 60 until 80) {
+                        Color.Yellow
+                    } else {
+                        Color.Red
+                    }
+                    Text(
+                        "$scoreint/100", color = color, fontSize = 35.sp, fontWeight = FontWeight.Bold
+                    )
                 }
             }
             Text("What is The Food Quality Score?", fontSize = 15.sp, fontWeight = FontWeight.Bold)
