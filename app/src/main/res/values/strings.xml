@@ -5,4 +5,6 @@
     <string name="title_activity_main2">MainActivity2</string>
     <string name="title_activity_questionnaire">Questionnaire</string>
     <string name="title_activity_insights">Insights</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="title_activity_nutricoach">Nutricoach</string>
 </resources>
