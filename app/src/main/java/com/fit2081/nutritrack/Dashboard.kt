@@ -38,7 +38,7 @@ class Dashboard : ComponentActivity() {
                 // Removed extra call to HomePage() here.
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                    bottomBar = { bottomMenu(navController) }
+                    bottomBar = { BottomMenu(navController) }
                 ) { innerPadding ->
                     Column {
                         MyNavHost(innerPadding, navController)
@@ -197,11 +197,11 @@ fun MyNavHost(innerpadding: PaddingValues, navController: NavHostController) {
 }
 
 @Composable
-fun bottomMenu(navController: NavHostController) {
+fun BottomMenu(navController: NavHostController) {
     var selected_item by remember { mutableStateOf(0) }
     val items = listOf("Home", "Insights", "Nutricoach", "Settings")
 
-    NavigationBar {
+    NavigationBar (containerColor = Color(0xFFC1FF72)) {
         items.forEachIndexed { index, item ->
             NavigationBarItem(
                 icon = {
