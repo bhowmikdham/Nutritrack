@@ -251,7 +251,7 @@ fun LoginScreen(modifier: Modifier = Modifier) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)), // Purple color
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
                     onClick = {
                         if (validateUser(context, userId, phoneNumber)) {
                             //we are storing the login details in the shared preferences
