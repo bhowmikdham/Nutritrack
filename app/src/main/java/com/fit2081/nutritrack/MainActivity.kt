@@ -95,7 +95,7 @@ fun WelcomeScreen(modifier: Modifier = Modifier) {
                     .height(50.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF8F5F5)),
                 onClick = {
-                    context.startActivity(Intent(context, Dashboard::class.java))
+                    context.startActivity(Intent(context, Login::class.java))
                 },
             ) {Text("Login", color = Color(0xFF000000))}
             }
