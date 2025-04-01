@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.Image
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -279,7 +280,7 @@ fun Insights() {
     val sharedPrefs = context.getSharedPreferences("my_prefs", Context.MODE_PRIVATE)
     val userId = sharedPrefs.getString("user_id", "") ?: ""
 
-    // List of nutrients (must match your CSV column mapping in getNutrientScore)
+    // List of nutrients to display; names must match your CSV mapping
     val nutrientList = listOf(
         "vegetables",
         "fruit",
@@ -287,17 +288,17 @@ fun Insights() {
         "whole grains",
         "meat and alternatives",
         "dairy and alternatives",
-        "water",
-        "unsaturated fats",
         "sodium",
-        "sugar",
         "alcohol",
-        "discretionary foods" // If you have a CSV column for this
+        "water",
+        "sugar",
+        "saturated fats",
+        "unsaturated fats"
     )
 
-    // Purple shades for the progress bars
-    val progressColor = Color(0xFF9C27B0)       // Active bar color
-    val trackColor = Color(0xFFE1BEE7)         // Background track color
+    // Colors for progress bars
+    val progressColor = Color(0xFF137A44)
+    val trackColor = Color(0xFFD7E6D6)
 
     Scaffold(
         topBar = {
@@ -316,23 +317,25 @@ fun Insights() {
                 .padding(16.dp)
                 .fillMaxSize()
         ) {
-            Text("Your Nutrient Scores", style = MaterialTheme.typography.headlineSmall)
+            Text("Your Nutrient Scores",fontWeight = FontWeight.Bold, fontSize = 30.sp)
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Display each nutrient row
             nutrientList.forEach { nutrient ->
-                // 1) Fetch the score from CSV (0..100)
+                // Fetch the nutrient score from CSV (should be 0..100)
                 val scoreStr = getNutrientScore(context, userId, nutrient)
+                // Debug: print the fetched score
+                println("Nutrient: $nutrient, scoreStr: $scoreStr")
                 val rawScore = scoreStr.toFloatOrNull() ?: 0f
+                println("rawscore: $rawScore")
+                // Convert to a scale out of 10 for display (if desired)
+                val (displayScore, fraction) = if (nutrient.lowercase() == "water" || nutrient.lowercase() == "alcohol") {
+                    val ds = rawScore / 2f       // Now ds is 0-5
+                    ds to (ds / 5f)              // fraction = ds divided by 5 (0f..1f)
+                } else {
+                    rawScore to (rawScore / 10f)  // fraction = rawScore/10 (0f..1f)
+                }
 
-                // 2) Convert 0..100 to 0..10 for display, if desired
-                //    (so 100 -> 10/10, 50 -> 5/10, etc.)
-                val outOf10 = rawScore / 10f
-
-                // 3) Convert to fraction for progress bar (0f..1f)
-                val fraction = outOf10 / 10f // same as rawScore / 100f
-
-                // Row: Nutrient label on left, "X/10" on right
+                // Display nutrient label on left and score on right
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -343,17 +346,19 @@ fun Insights() {
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
-                        text = "${outOf10.toInt()}/10",
+                        text = if (nutrient.lowercase() == "water" || nutrient.lowercase() == "alcohol")
+                            "$displayScore/5"
+                        else
+                            "$displayScore/10",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
-
-                // Progress bar below the row
+                // Display the progress bar with the fraction (note: pass the value directly)
                 LinearProgressIndicator(
-                    progress = {fraction},
+                    progress = fraction,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(8.dp)
+                        .height(12.dp)
                         .padding(vertical = 4.dp),
                     color = progressColor,
                     trackColor = trackColor
@@ -361,7 +366,7 @@ fun Insights() {
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
-            // Finally, show the total score out of 100
+            // Total Food Quality Score section
             Spacer(modifier = Modifier.height(16.dp))
             val totalScoreStr = getUserHIEFAScore(context, userId)
             val totalScore = totalScoreStr?.toFloatOrNull() ?: 0f
@@ -373,7 +378,6 @@ fun Insights() {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Progress bar for total
                 LinearProgressIndicator(
                     progress = totalFraction,
                     modifier = Modifier
@@ -388,6 +392,7 @@ fun Insights() {
         }
     }
 }
+
 
 
 
