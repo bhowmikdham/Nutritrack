@@ -118,6 +118,21 @@ fun isPhoneRegistered(context: Context, phoneNumber: String): Boolean {
         false
     }
 }
+fun isUserRegistered(context: Context, userId: String): Boolean {
+    return try {
+        context.assets.open("accounts.csv").bufferedReader().useLines { lines ->
+            // Skip the header row
+            lines.drop(1).any { line ->
+                val tokens = line.split(",")
+                // Compare the phone number in column 0
+                tokens.isNotEmpty() && tokens[1].trim() == userId
+            }
+        }
+    } catch (e: Exception) {
+        // Log or handle error
+        false
+    }
+}
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -176,7 +191,8 @@ fun LoginScreen(modifier: Modifier = Modifier) {
                 ) {
                     OutlinedTextField(
                         value = userId,
-                        onValueChange = { userId = it },
+                        onValueChange = { userId = it
+                            userIdError = userId.isNotEmpty() && !isUserRegistered(context, userId) },
                         label = { Text("My ID (Provided by your Clinician)") },
                         trailingIcon = {
                             ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
@@ -230,8 +246,7 @@ fun LoginScreen(modifier: Modifier = Modifier) {
                         text = "Phone Number Not Registered",
                         color = MaterialTheme.colorScheme.error,
                         fontSize = 12.sp,
-                        modifier = Modifier.padding(start = 8.dp, top = 4.dp)
-                    )
+                        modifier = Modifier.padding(start = 8.dp, top = 4.dp))
                 }
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -263,7 +278,11 @@ fun LoginScreen(modifier: Modifier = Modifier) {
                             }
                             Toast.makeText(context, "Login Successful", Toast.LENGTH_LONG).show()
                             context.startActivity(Intent(context,Questionnaire::class.java))
-                        } else {
+                        }
+                        else if (userIdError || phoneError) {
+                            Toast.makeText(context, "Please Enter a Valid User ID or Phone Number", Toast.LENGTH_LONG).show()
+                        }
+                        else {
                             Toast.makeText(context, "Incorrect Credentials", Toast.LENGTH_LONG).show()
                         }
                     }

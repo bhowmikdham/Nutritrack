@@ -36,6 +36,9 @@ import com.fit2081.nutritrack.ui.theme.White40
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.startActivity
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 
 
 class MainActivity : ComponentActivity() {
@@ -85,9 +88,11 @@ fun WelcomeScreen(modifier: Modifier = Modifier) {
                     "before making any changes to your diet, exercise, or health regimen. " +
                     "Use this app at your own risk. " +
                     "If you’d like to an Accredited Practicing Dietitian (APD)," +
-                    " please visit the Monash Nutrition/Dietetics Clinic (discounted rates for students): https://www.monash.edu/medicine/scs/nu", color = Color(0xFF000000),
-                textAlign = TextAlign.Center
+                    " please visit the Monash Nutrition/Dietetics Clinic (discounted rates for students):", color = Color(0xFF000000),
+                textAlign = TextAlign.Center,
+                fontSize = 12.sp
             )
+            Text("https://www.monash.edu/medicine/scs/nu", fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(40.dp))
             Button( shape = RoundedCornerShape(20.dp),
                 modifier = Modifier
@@ -95,9 +100,11 @@ fun WelcomeScreen(modifier: Modifier = Modifier) {
                     .height(50.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF8F5F5)),
                 onClick = {
-                    context.startActivity(Intent(context, Dashboard::class.java))
+                    context.startActivity(Intent(context, Login::class.java))
                 },
             ) {Text("Login", color = Color(0xFF000000))}
+            Spacer(modifier= Modifier.height(20.dp))
+            Text("Designed By Bhowmik Dham(34337229)", textAlign = TextAlign.Center)
             }
 
     }

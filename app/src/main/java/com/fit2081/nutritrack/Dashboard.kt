@@ -306,7 +306,7 @@ fun Insights(navController: NavHostController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Insights") },
+                title = { Text("Insights",fontWeight = FontWeight.ExtraBold, fontSize = 20.sp) },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = Color(0xFFC1FF72)
                 )
@@ -428,8 +428,11 @@ fun Insights(navController: NavHostController) {
             ){
                 Text("Share With Someone", fontSize = 15.sp, color = Color.Black)
             }
-            Button(onClick ={navController.navigate("Nutricoach")}){
-                Text("Improve My Diet")
+            Button(
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
+                shape = RoundedCornerShape(12.dp),
+                onClick ={navController.navigate("Nutricoach")}){
+                Text("Improve My Diet",fontSize = 15.sp, color = Color.Black)
             }
             }
     }
