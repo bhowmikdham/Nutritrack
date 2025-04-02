@@ -2,6 +2,7 @@ package com.fit2081.nutritrack
 
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.ACTION_SEND
 import androidx.compose.foundation.Image
 import android.os.Bundle
 import android.util.Log
@@ -27,8 +28,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -273,9 +276,9 @@ fun getNutrientScore(context: Context, userId: String, nutrient: String): String
     return ""
 }
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true)
+@Preview()
 @Composable
-fun Insights() {
+fun Insights(navController: NavHostController) {
     val context = LocalContext.current
     val sharedPrefs = context.getSharedPreferences("my_prefs", Context.MODE_PRIVATE)
     val userId = sharedPrefs.getString("user_id", "") ?: ""
@@ -340,29 +343,40 @@ fun Insights() {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
-                ) {
+                ) {//got this idea from chat GPT for the first character to be upper code
                     Text(
                         text = nutrient.replaceFirstChar { it.uppercaseChar() },
-                        style = MaterialTheme.typography.bodyLarge
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontSize = 14.sp
                     )
-                    Text(
-                        text = if (nutrient.lowercase() == "water" || nutrient.lowercase() == "alcohol")
-                            "$displayScore/5"
-                        else
-                            "$displayScore/10",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                    Column (modifier = Modifier
+                        .weight(1f)
+                        .padding(5.dp),
+                        horizontalAlignment = Alignment.End,
+                        verticalArrangement = Arrangement.Center){
+                        LinearProgressIndicator(
+                            progress = fraction,
+                            modifier = Modifier
+                                .width(150.dp)
+                                .height(12.dp)
+                                .padding(vertical = 2.dp),
+                            color = progressColor,
+                            trackColor = trackColor
+                        )}
+                    Box(modifier = Modifier.width(50.dp),contentAlignment = Alignment.CenterStart) {
+                        Text(
+                            text = if (nutrient.lowercase() == "water" || nutrient.lowercase() == "alcohol")
+                                "$displayScore/5"
+                            else
+                                "$displayScore/10",
+                            modifier = Modifier.align(Alignment.CenterStart),
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontSize = 12.sp
+                        )
+                    }
                 }
                 // Display the progress bar with the fraction (note: pass the value directly)
-                LinearProgressIndicator(
-                    progress = fraction,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(12.dp)
-                        .padding(vertical = 4.dp),
-                    color = progressColor,
-                    trackColor = trackColor
-                )
+
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
@@ -372,7 +386,7 @@ fun Insights() {
             val totalScore = totalScoreStr?.toFloatOrNull() ?: 0f
             val totalFraction = totalScore / 100f
 
-            Text("Total Food Quality Score", style = MaterialTheme.typography.bodyLarge)
+            Text("Total Food Quality Score", style = MaterialTheme.typography.bodyLarge, fontSize = 20.sp, fontWeight = FontWeight.Bold)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -382,14 +396,42 @@ fun Insights() {
                     progress = totalFraction,
                     modifier = Modifier
                         .weight(1f)
-                        .height(8.dp)
-                        .padding(vertical = 4.dp, horizontal = 8.dp),
+                        .height(8.dp),
                     color = progressColor,
                     trackColor = trackColor
                 )
                 Text("${totalScore.toInt()}/100", style = MaterialTheme.typography.bodyMedium)
             }
-        }
+            Spacer(modifier = Modifier.height(8.dp))
+            /**
+             * SHARE WITH SOMEONE BUTTON
+             *
+             *
+             */
+            var shareText by remember { mutableStateOf("") }
+
+            Button(
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
+                shape = RoundedCornerShape(12.dp),
+                onClick = {
+                    shareText = "Hey my Total Food Quality Score is ${totalScore.toString()}"
+                    //create a intent to share the text
+                    val shareIntent = Intent(ACTION_SEND)
+                    //set the type of data to share
+                    shareIntent.type = "text/plain"
+                    //set the data to share, in this case, the text
+                    shareIntent.putExtra(Intent.EXTRA_TEXT, shareText)
+                    //start the activity to share the text, with a chooser to select the app
+                    context.startActivity(Intent.createChooser(shareIntent, "Share via"))
+
+                }
+            ){
+                Text("Share With Someone", fontSize = 15.sp, color = Color.Black)
+            }
+            Button(onClick ={navController.navigate("Nutricoach")}){
+                Text("Improve My Diet")
+            }
+            }
     }
 }
 
@@ -417,7 +459,7 @@ fun MyNavHost(innerpadding: PaddingValues, navController: NavHostController) {
             HomePage()
         }
         composable("Insights") {
-            Insights()
+            Insights(navController = navController)
         }
         composable("Nutricoach") {
             Nutricoach()
