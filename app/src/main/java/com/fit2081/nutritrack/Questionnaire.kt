@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -42,6 +43,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -377,7 +379,20 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                 AlertDialog(
                     onDismissRequest = { showHealthyDialog = false },
                     title = { Text("Healthy Eater", fontWeight = FontWeight.Bold) },
-                    text = { Text("You prioritize nutrition, whole foods, and balanced meals.") },
+                    text = {
+                        Column(
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.persona_1),
+                                contentDescription = "Balance Seeker",
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier
+                                    .height(160.dp)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        Text("I’m passionate about healthy eating & health plays a big part in my life. I use social media to follow active lifestyle personalities or get new recipes/exercise ideas. I may even buy superfoods or follow a particular type of diet. I like to think I am super healthy.", textAlign = TextAlign.Center) }},
                     confirmButton = {
                         Button(onClick = { showHealthyDialog = false }) {
                             Text("OK")
@@ -389,8 +404,21 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
             if (showIndulgentDialog) {
                 AlertDialog(
                     onDismissRequest = { showIndulgentDialog = false },
-                    title = { Text("Indulgent Eater", fontWeight = FontWeight.Bold) },
-                    text = { Text("You enjy occasional treats and desserts, and love to indulge.") },
+                    title = { Text("Mindful Eater", fontWeight = FontWeight.Bold) },
+                    text = {
+                        Column(
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.persona_2),
+                                contentDescription = "Balance Seeker",
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier
+                                    .height(160.dp)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        Text("I’m health-conscious and being healthy and eating healthy is important to me. Although health means different things to different people, I make conscious lifestyle decisions about eating based on what I believe healthy means. I look for new recipes and healthy eating information on social media.", textAlign = TextAlign.Center) }},
                     confirmButton = {
                         Button(onClick = { showIndulgentDialog = false }) {
                             Text("OK")
@@ -402,8 +430,20 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
             if (showAdventurousDialog) {
                 AlertDialog(
                     onDismissRequest = { showAdventurousDialog = false },
-                    title = { Text("Adventurous Eater", fontWeight = FontWeight.Bold) },
-                    text = { Text("You love trying exotic cuisines and bold flavors.") },
+                    title = { Text("Welness Striver", fontWeight = FontWeight.Bold) },
+                    text = { Column(
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.persona_3),
+                            contentDescription = "Balance Seeker",
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .height(160.dp)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("I aspire to be healthy (but struggle sometimes). Healthy eating is hard work! I’ve tried to improve my diet, but always find things that make it difficult to stick with the changes. Sometimes I notice recipe ideas or healthy eating hacks, and if it seems easy enough, I’ll give it a go.", textAlign = TextAlign.Center) }},
                     confirmButton = {
                         Button(onClick = { showAdventurousDialog = false }) {
                             Text("OK")
@@ -415,7 +455,7 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
             if (showComfortDialog) {
                 AlertDialog(
                     onDismissRequest = { showComfortDialog = false },
-                    title = { Text("Comfort Food Lover", fontWeight = FontWeight.Bold) },
+                    title = { Text("Balance Seeker", fontWeight = FontWeight.Bold) },
                     text = {
                         Column(
                             verticalArrangement = Arrangement.Center,
@@ -428,7 +468,8 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                                 modifier = Modifier
                                     .height(160.dp)
                             )
-                        Text("You find comfort in familiar and soothing dishes.") }},
+                            Spacer(modifier = Modifier.height(8.dp))
+                        Text("I try and live a balanced lifestyle, and I think that all foods are okay in moderation. I shouldn’t have to feel guilty about eating a piece of cake now and again. I get all sorts of inspiration from social media like finding out about new restaurants, fun recipes and sometimes healthy eating tips.", textAlign = TextAlign.Center) }},
                     confirmButton = {
                         Button(onClick = { showComfortDialog = false }) {
                             Text("OK")
@@ -440,8 +481,20 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
             if (showBalancedDialog) {
                 AlertDialog(
                     onDismissRequest = { showBalancedDialog = false },
-                    title = { Text("Balanced Eater", fontWeight = FontWeight.Bold) },
-                    text = { Text("You maintain a balanced diet with a mix of different food groups.") },
+                    title = { Text("Health Procastinator", fontWeight = FontWeight.Bold) },
+                    text = { Column(
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.persona_5),
+                            contentDescription = "Balance Seeker",
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .height(160.dp)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("I’m contemplating healthy eating but it’s not a priority for me right now. I know the basics about what it means to be healthy, but it doesn’t seem relevant to me right now. I have taken a few steps to be healthier but I am not motivated to make it a high priority because I have too many other things going on in my life.", textAlign = TextAlign.Center) }},
                     confirmButton = {
                         Button(onClick = { showBalancedDialog = false }) {
                             Text("OK")
@@ -453,8 +506,21 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
             if (showPickyDialog) {
                 AlertDialog(
                     onDismissRequest = { showPickyDialog = false },
-                    title = { Text("Picky Eater", fontWeight = FontWeight.Bold) },
-                    text = { Text("You are selective about your meals and have specific tastes.") },
+                    title = { Text("Food Carefree", fontWeight = FontWeight.Bold) },
+                    text = {
+                        Column(
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.persona_6),
+                                contentDescription = "Balance Seeker",
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier
+                                    .height(160.dp)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        Text("I’m not bothered about healthy eating. I don’t really see the point and I don’t think about it. I don’t really notice healthy eating tips or recipes and I don’t care what I eat.", textAlign = TextAlign.Center) }},
                     confirmButton = {
                         Button(onClick = { showPickyDialog = false }) {
                             Text("OK")
@@ -472,6 +538,12 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .border( //discovered this function on the Android Documentation
+                        width = 1.dp,
+                        color = Color.Gray,
+                        shape = RoundedCornerShape(8.dp)
+                    )
+
             ) {
 
                 var expanded by remember { mutableStateOf(false) }
@@ -484,27 +556,30 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                     "Health Procrastinator",
                     "Picky Eater"
                 )
-                OutlinedTextField(
-                        value = selectedPersona,
-                        onValueChange = { },
-                        readOnly = true,
-                        shape = RoundedCornerShape(20.dp),
-                        label = { Text("Choose your Persona Type") },
-                        trailingIcon = {
-                            Icon(
-                                Icons.Default.ArrowDropDown,
-                                contentDescription = "Drop Down Menu"
-                            )
-                        },
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                    )
+                    {
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable{expanded = true}
+                            .clickable { expanded = true }
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     )
+                    {
+                        Text(selectedPersona)
+                        Icon(Icons.Default.ArrowDropDown, contentDescription = "Dropdown")
+                    }
+
                     DropdownMenu(
                         expanded = expanded,
                         onDismissRequest = { expanded = false },
                         modifier = Modifier.fillMaxWidth()
-                    ) {
+                    )
+                        {
                         personas.forEach { persona ->
                             DropdownMenuItem(
                                 text = { Text(persona) },
@@ -515,107 +590,108 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                             )
                         }
                     }
-
-                }
-            Spacer(modifier = Modifier.height(15.dp))
-            Text("Timings", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(10.dp))
-            Row {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    horizontalAlignment = Alignment.Start){
-                Text("What time of day approx. do you normally eat your biggest meal?",fontSize = 13.sp)
-                }
-                Column(
-                    modifier = Modifier
-                        .weight(1f),
-                    horizontalAlignment = Alignment.End){
-                    Button(
-                        onClick = { timePickerFun(context,mTime = biggestMealTime).show() }
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.DateRange,
-                                contentDescription = "Calendar Icon")
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(text = biggestMealTime.value)
-                        }
                     }
 
                 }
-
-
-
-            }
-            Row {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    horizontalAlignment = Alignment.CenterHorizontally){
-                Text("What time of day approx. do you normally eat your biggest meal?", fontSize = 13.sp)
-                }
-                Column(
-                    modifier = Modifier.weight(0.7f),
-                    horizontalAlignment = Alignment.End){
-                    Button(
-                        onClick = { timePickerFun(context,mTime = SleepTime).show() }
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.DateRange,
-                                contentDescription = "Calendar Icon")
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(text = SleepTime.value)
+                Spacer(modifier = Modifier.height(15.dp))
+                Text("Timings", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(10.dp))
+                Row {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.Start){
+                    Text("What time of day approx. do you normally eat your biggest meal?",fontSize = 13.sp)
+                    }
+                    Column(
+                        modifier = Modifier
+                            .weight(1f),
+                        horizontalAlignment = Alignment.End){
+                        Button(
+                            onClick = { timePickerFun(context,mTime = biggestMealTime).show() }
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.DateRange,
+                                    contentDescription = "Calendar Icon")
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(text = biggestMealTime.value)
+                            }
                         }
+
                     }
 
+
+
                 }
-
-
-
-
-            }
-            Row {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    horizontalAlignment = Alignment.Start){
+                Row {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally){
                     Text("What time of day approx. do you normally eat your biggest meal?", fontSize = 13.sp)
-                }
-                Column(
-                    modifier = Modifier.weight(1f),
-                    horizontalAlignment = Alignment.End){
-                    Button(
-                        onClick = { timePickerFun(context,mTime = WakeTime).show() }
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.DateRange,
-                                contentDescription = "Calendar Icon")
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(text = WakeTime.value)
+                    }
+                    Column(
+                        modifier = Modifier.weight(0.7f),
+                        horizontalAlignment = Alignment.End){
+                        Button(
+                            onClick = { timePickerFun(context,mTime = SleepTime).show() }
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.DateRange,
+                                    contentDescription = "Calendar Icon")
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(text = SleepTime.value)
+                            }
                         }
+
                     }
 
+
+
+
+                }
+                Row {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.Start){
+                        Text("What time of day approx. do you normally eat your biggest meal?", fontSize = 13.sp)
+                    }
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.End){
+                        Button(
+                            onClick = { timePickerFun(context,mTime = WakeTime).show() }
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.DateRange,
+                                    contentDescription = "Calendar Icon")
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(text = WakeTime.value)
+                            }
+                        }
+
+                    }
+
+
+
+
                 }
 
 
+                Button(
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    onClick = {
+                        context.startActivity(Intent(context,Dashboard::class.java))
+                    }
 
 
-            }
+                ){Text("Save And Continue")
 
-
-            Button(
-                shape = RoundedCornerShape(10.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                onClick = {
-                    context.startActivity(Intent(context,Dashboard::class.java))
                 }
-
-
-            ){Text("Save And Continue")
-
-            }
             }
         }}
 
