@@ -1,6 +1,8 @@
 package com.fit2081.nutritrack
 
+import android.app.TimePickerDialog
 import android.content.Intent
+import android.icu.util.Calendar
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -12,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -27,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,13 +61,24 @@ class Questionnaire : ComponentActivity() {
     }
 }
 
+fun timePickerFun(context: android.content.Context,mTime: MutableState<String>): TimePickerDialog {
+    // Create a Calendar instance and retrieve current hour and minute
+    val mCalendar = Calendar.getInstance()
+    val mHour = mCalendar.get(Calendar.HOUR_OF_DAY)
+    val mMinute = mCalendar.get(Calendar.MINUTE)
 
-
-
-
-
-
-
+    // Return the TimePickerDialog
+    return TimePickerDialog(
+        context,
+        { _, selectedHour, selectedMinute ->
+            // Update the mutable state with the chosen time
+            mTime.value = "$selectedHour:$selectedMinute"
+        },
+        mHour,
+        mMinute,
+        false // 'false' means 12-hour format; set 'true' for 24-hour format
+    )
+}
 @Preview(showBackground = true)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,9 +102,9 @@ class Questionnaire : ComponentActivity() {
     var showBalancedDialog by remember { mutableStateOf(false) }
     var showPickyDialog by remember { mutableStateOf(false) }
 
-    val biggestMealTime = remember { mutableStateOf("") }
-    val SleepTime = remember { mutableStateOf("") }
-    val WakeTime = remember { mutableStateOf("") }
+    val biggestMealTime = remember { mutableStateOf("00:00") }
+    val SleepTime = remember { mutableStateOf("00:00") }
+    val WakeTime = remember { mutableStateOf("00:00") }
 
     Scaffold(
         containerColor = Color(0xFFF8F5F5),
@@ -509,13 +524,79 @@ class Questionnaire : ComponentActivity() {
                 Column(
                     modifier = Modifier.weight(1f),
                     horizontalAlignment = Alignment.Start){
-                Text("What time of day approx. do you normally eat your biggest meal?")
+                Text("What time of day approx. do you normally eat your biggest meal?",fontSize = 13.sp)
                 }
+                Column(
+                    modifier = Modifier
+                        .weight(1f),
+                    horizontalAlignment = Alignment.End){
+                    Button(
+                        onClick = { timePickerFun(context,mTime = biggestMealTime).show() }
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.DateRange,
+                                contentDescription = "Calendar Icon")
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = biggestMealTime.value)
+                        }
+                    }
+
+                }
+
+
+
+            }
+            Row {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally){
+                Text("What time of day approx. do you normally eat your biggest meal?", fontSize = 13.sp)
+                }
+                Column(
+                    modifier = Modifier.weight(0.7f),
+                    horizontalAlignment = Alignment.End){
+                    Button(
+                        onClick = { timePickerFun(context,mTime = SleepTime).show() }
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.DateRange,
+                                contentDescription = "Calendar Icon")
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = SleepTime.value)
+                        }
+                    }
+
+                }
+
+
+
+
+            }
+            Row {
                 Column(
                     modifier = Modifier.weight(1f),
                     horizontalAlignment = Alignment.Start){
+                    Text("What time of day approx. do you normally eat your biggest meal?", fontSize = 13.sp)
+                }
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.End){
+                    Button(
+                        onClick = { timePickerFun(context,mTime = WakeTime).show() }
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.DateRange,
+                                contentDescription = "Calendar Icon")
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = WakeTime.value)
+                        }
+                    }
 
                 }
+
 
 
 
@@ -536,8 +617,7 @@ class Questionnaire : ComponentActivity() {
 
             }
             }
-
-    }}
+        }}
 
 
 
