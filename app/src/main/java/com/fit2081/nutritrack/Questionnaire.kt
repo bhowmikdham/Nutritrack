@@ -18,11 +18,13 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -103,11 +105,13 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
     var showComfortDialog by remember { mutableStateOf(false) }
     var showBalancedDialog by remember { mutableStateOf(false) }
     var showPickyDialog by remember { mutableStateOf(false) }
+    var saveDialog by remember { mutableStateOf(false) }
 
     val biggestMealTime = remember { mutableStateOf("00:00") }
     val SleepTime = remember { mutableStateOf("00:00") }
     val WakeTime = remember { mutableStateOf("00:00") }
 
+    var selectedPersona by remember { mutableStateOf("") }
     Scaffold(
         containerColor = Color(0xFFF8F5F5),
         topBar = {
@@ -291,7 +295,7 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
              * make a list for iteraiton(persona headings mapped to their descriptions)
              * make a general modal loop , which loops on the list of modals
              */
-
+            HorizontalDivider(thickness = 2.dp)
             Text("Your Persona", fontSize = 16.sp, fontWeight = FontWeight.Bold)
             Text(
                 "People can be broadly classified into 6 different types based on their eating preferences. Click on each button below to find out the different types, and select the type that best fits you!",
@@ -310,20 +314,22 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Box() {
                         Button(
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
                             onClick = { showHealthyDialog = true },
                             shape = RoundedCornerShape(8.dp),
                             contentPadding = PaddingValues(10.dp)
                         ) {
-                            Text("Health Devotee", fontSize = 12.sp)
+                            Text("Health Devotee", fontSize = 11.sp, color = Color.Black)
                         }
                     }
                     Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
                         Button(
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
                             onClick = { showIndulgentDialog = true },
                             shape = RoundedCornerShape(8.dp),
                             contentPadding = PaddingValues(10.dp)
                         ) {
-                            Text("Indulgent Eater", fontSize = 12.sp)
+                            Text("Mindful Eater", fontSize = 11.sp,color = Color.Black)
                         }
                     }
                     Box(
@@ -331,12 +337,13 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                         contentAlignment = Alignment.CenterEnd
                     ) {
                         Button(
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
                             onClick = { showAdventurousDialog = true },
                             shape = RoundedCornerShape(8.dp),
                             contentPadding = PaddingValues(10.dp)
 
                         ) {
-                            Text("Adventurous Eater", fontSize = 12.sp)
+                            Text("Welness Striver", fontSize = 11.sp,color = Color.Black)
                         }
                     }
                 }
@@ -345,29 +352,32 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Box() {
                         Button(
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
                             onClick = { showComfortDialog = true },
                             shape = RoundedCornerShape(8.dp),
                             contentPadding = PaddingValues(10.dp)
                         ) {
-                            Text("Balance Seeker", fontSize = 12.sp, maxLines = 1)
+                            Text("Balance Seeker", fontSize = 11.sp,color = Color.Black)
                         }
                     }
                     Box(modifier = Modifier.weight(0.8f), contentAlignment = Alignment.Center) {
                         Button(
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
                             onClick = { showBalancedDialog = true },
                             shape = RoundedCornerShape(9.dp),
                             contentPadding = PaddingValues(10.dp)
                         ) {
-                            Text("Health Procastinator", fontSize = 12.sp, maxLines = 1)
+                            Text("Health Procastinator", fontSize = 11.sp, color = Color.Black)
                         }
                     }
                     Box(modifier = Modifier.weight(0.5f), contentAlignment = Alignment.Center) {
                         Button(
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
                             onClick = { showPickyDialog = true },
                             shape = RoundedCornerShape(8.dp),
                             contentPadding = PaddingValues(10.dp)
                         ) {
-                            Text("Picky Eater", fontSize = 12.sp)
+                            Text("Food Carefree", fontSize = 11.sp, color = Color.Black)
                         }
                     }
                 }
@@ -528,7 +538,9 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                     }
                 )
             }
-            Spacer(modifier = Modifier.padding(10.dp))
+            Spacer(modifier = Modifier.padding(3.dp))
+            HorizontalDivider(thickness = 2.dp)// taken from https://developer.android.com/develop/ui/compose/components/divider
+            Spacer(modifier = Modifier.padding(3.dp))
             Text(
                 "Which persona suits you the best?",
                 fontSize = 16.sp,
@@ -547,7 +559,6 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
             ) {
 
                 var expanded by remember { mutableStateOf(false) }
-                var selectedPersona by remember { mutableStateOf("") }
                 val personas = listOf(
                     "Healthy Devotee",
                     "Mindful Eater",
@@ -607,14 +618,17 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                             .weight(1f),
                         horizontalAlignment = Alignment.End){
                         Button(
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
+                            shape = RoundedCornerShape(8.dp),
                             onClick = { timePickerFun(context,mTime = biggestMealTime).show() }
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
                                     imageVector = Icons.Default.DateRange,
-                                    contentDescription = "Calendar Icon")
+                                    contentDescription = "Calendar Icon",
+                                    tint = Color(0xFF137A44))
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text(text = biggestMealTime.value)
+                                Text(text = biggestMealTime.value,color = Color.Black)
                             }
                         }
 
@@ -633,14 +647,17 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                         modifier = Modifier.weight(0.7f),
                         horizontalAlignment = Alignment.End){
                         Button(
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
+                            shape = RoundedCornerShape(8.dp),
                             onClick = { timePickerFun(context,mTime = SleepTime).show() }
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
                                     imageVector = Icons.Default.DateRange,
-                                    contentDescription = "Calendar Icon")
+                                    contentDescription = "Calendar Icon",
+                                    tint = Color(0xFF137A44))
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text(text = SleepTime.value)
+                                Text(text = SleepTime.value, color = Color.Black)
                             }
                         }
 
@@ -660,14 +677,17 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                         modifier = Modifier.weight(1f),
                         horizontalAlignment = Alignment.End){
                         Button(
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
+                            shape = RoundedCornerShape(8.dp),
                             onClick = { timePickerFun(context,mTime = WakeTime).show() }
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
                                     imageVector = Icons.Default.DateRange,
-                                    contentDescription = "Calendar Icon")
+                                    contentDescription = "Calendar Icon",
+                                    tint = Color(0xFF137A44))
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text(text = WakeTime.value)
+                                Text(text = WakeTime.value,color = Color.Black)
                             }
                         }
 
@@ -680,18 +700,69 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
 
 
                 Button(
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF137A44)),
                     shape = RoundedCornerShape(10.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
-                    onClick = {
-                        context.startActivity(Intent(context,Dashboard::class.java))
-                    }
+                    onClick = { saveDialog = true}
 
-
-                ){Text("Save And Continue")
+                ){Text("Review And Continue",fontSize = 16.sp, fontWeight = FontWeight.Bold)
 
                 }
+            if (saveDialog) {
+                AlertDialog(
+                    onDismissRequest = { showHealthyDialog = false },
+                    title = { Text("Below Is The Information You Entered", fontWeight = FontWeight.Bold) },
+                    text = {
+                        Column(
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Text("Categories You Can Eat")
+                            if(fruits){
+                                Text("Fruits")
+                            }
+                            if(vegetables){
+                                Text("Vegetables")
+                            }
+                            if(grains){
+                                Text("Grains")
+                            }
+                            if(redMeat){
+                                Text("Red Meat")
+                            }
+                            if(seafood){
+                                Text("Seafood")
+                            }
+                            if(poultry) {
+                                Text("Poultry")
+                            }
+                            if(fish){
+                                Text("Fish")
+                            }
+                            if(eggs){
+                                Text("Eggs")
+                            }
+                            if(nutsSeeds){
+                                Text("Nuts/Seeds")
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text("Persona You Selected",fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                            Text(selectedPersona)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text("Timings You Selected",fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                            Text("Biggest Meal Time: ${biggestMealTime.value}")
+                            Text("Sleep Time: ${SleepTime.value}")
+                            Text("Wake Time: ${WakeTime.value}")
+                        }},
+                    confirmButton = {
+                        Button(onClick = { }) {
+                            Text("Save")
+                        }
+                    }
+                )
+            }
             }
         }}
 
