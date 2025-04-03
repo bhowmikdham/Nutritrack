@@ -277,7 +277,14 @@ fun LoginScreen(modifier: Modifier = Modifier) {
                                 apply()
                             }
                             Toast.makeText(context, "Login Successful", Toast.LENGTH_LONG).show()
-                            context.startActivity(Intent(context,Questionnaire::class.java))
+                            val sharedPrefs_global = context.getSharedPreferences("my_prefs", android.content.Context.MODE_PRIVATE)
+                            //we do this so that we dont collide with diff users and each user have its own shared perf data stored when their questionnaire is loaded or edited
+                            val userId = sharedPrefs_global.getString("user_id", "") ?: "default"
+                            val sharedPrefs_user = context.getSharedPreferences("my_prefs_$userId", android.content.Context.MODE_PRIVATE)
+                            val Redirect = sharedPrefs_user.getBoolean("Redirect", false)
+                            if (Redirect){
+                            context.startActivity(Intent(context,Dashboard::class.java))}
+                            else {context.startActivity(Intent(context,Questionnaire::class.java))}
                         }
                         else if (userIdError || phoneError) {
                             Toast.makeText(context, "Please Enter a Valid User ID or Phone Number", Toast.LENGTH_LONG).show()

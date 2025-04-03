@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
 import com.fit2081.nutritrack.ui.theme.NutritrackTheme
+import java.lang.ProcessBuilder.Redirect
 
 
 class Questionnaire : ComponentActivity() {
@@ -64,19 +65,17 @@ class Questionnaire : ComponentActivity() {
         }
     }
 }
-
+//function taken from lab and modified accordingly
 fun timePickerFun(context: android.content.Context,mTime: MutableState<String>): TimePickerDialog {
-    // Create a Calendar instance and retrieve current hour and minute
     val mCalendar = Calendar.getInstance()
     val mHour = mCalendar.get(Calendar.HOUR_OF_DAY)
     val mMinute = mCalendar.get(Calendar.MINUTE)
 
-    // Return the TimePickerDialog
     return TimePickerDialog(
         context,
         { _, selectedHour, selectedMinute ->
-            // Update the mutable state with the chosen time
-            mTime.value = "$selectedHour:$selectedMinute"
+            mTime.value = String.format("%02d:%02d", selectedHour, selectedMinute)// string %02d is used here to always fromat the hours:minutes in two digit format
+
         },
         mHour,
         mMinute,
@@ -88,17 +87,22 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
 @Composable
     fun FoodIntakeQuestionnaire() {
     val context = LocalContext.current
-    // Declare your checkbox states directly here:
-    var fruits by remember { mutableStateOf(false) }
-    var vegetables by remember { mutableStateOf(false) }
-    var grains by remember { mutableStateOf(false) }
-    var redMeat by remember { mutableStateOf(false) }
-    var seafood by remember { mutableStateOf(false) }
-    var poultry by remember { mutableStateOf(false) }
-    var fish by remember { mutableStateOf(false) }
-    var eggs by remember { mutableStateOf(false) }
-    var nutsSeeds by remember { mutableStateOf(false) }
+    val sharedPrefs_global = context.getSharedPreferences("my_prefs", android.content.Context.MODE_PRIVATE)
+    //we do this so that we dont collide with diff users and each user have its own shared perf data stored when their questionnaire is loaded or edited
+    val userId = sharedPrefs_global.getString("user_id", "") ?: "default"
+    val sharedPrefs = context.getSharedPreferences("my_prefs_$userId", android.content.Context.MODE_PRIVATE)
+    // Initialize checkbox states from SharedPreferences, with default value false if not stored
+    var fruits by remember { mutableStateOf(sharedPrefs.getBoolean("fruits", false)) }
+    var vegetables by remember { mutableStateOf(sharedPrefs.getBoolean("vegetables", false)) }
+    var grains by remember { mutableStateOf(sharedPrefs.getBoolean("grains", false)) }
+    var redMeat by remember { mutableStateOf(sharedPrefs.getBoolean("red_meat", false)) }
+    var seafood by remember { mutableStateOf(sharedPrefs.getBoolean("seafood", false)) }
+    var poultry by remember { mutableStateOf(sharedPrefs.getBoolean("poultry", false)) }
+    var fish by remember { mutableStateOf(sharedPrefs.getBoolean("fish", false)) }
+    var eggs by remember { mutableStateOf(sharedPrefs.getBoolean("eggs", false)) }
+    var nutsSeeds by remember { mutableStateOf(sharedPrefs.getBoolean("nuts_seeds", false)) }
 
+    // These dialog flags can remain local (they don't need persistence)
     var showHealthyDialog by remember { mutableStateOf(false) }
     var showIndulgentDialog by remember { mutableStateOf(false) }
     var showAdventurousDialog by remember { mutableStateOf(false) }
@@ -107,11 +111,21 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
     var showPickyDialog by remember { mutableStateOf(false) }
     var saveDialog by remember { mutableStateOf(false) }
 
-    val biggestMealTime = remember { mutableStateOf("00:00") }
-    val SleepTime = remember { mutableStateOf("00:00") }
-    val WakeTime = remember { mutableStateOf("00:00") }
+    // Initialize time states from SharedPreferences, with "00:00" as the default value
+    val biggestMealTime = remember {
+        mutableStateOf(sharedPrefs.getString("biggest_meal_time", "00:00") ?: "00:00")
+    }
+    val SleepTime = remember {
+        mutableStateOf(sharedPrefs.getString("sleep_time", "00:00") ?: "00:00")
+    }
+    val WakeTime = remember {
+        mutableStateOf(sharedPrefs.getString("wake_time", "00:00") ?: "00:00")
+    }
 
-    var selectedPersona by remember { mutableStateOf("") }
+    // Initialize selected persona from SharedPreferences
+    var selectedPersona by remember {
+        mutableStateOf(sharedPrefs.getString("selected_persona", "") ?: "")
+    }
     Scaffold(
         containerColor = Color(0xFFF8F5F5),
         topBar = {
@@ -712,14 +726,11 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                 }
             if (saveDialog) {
                 AlertDialog(
-                    onDismissRequest = { showHealthyDialog = false },
+                    onDismissRequest = { saveDialog = false },
                     title = { Text("Below Is The Information You Entered", fontWeight = FontWeight.Bold) },
                     text = {
-                        Column(
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            Text("Categories You Can Eat")
+                        Column{
+                            Text("Categories You Can Eat",fontSize = 16.sp, fontWeight = FontWeight.Bold)
                             if(fruits){
                                 Text("Fruits")
                             }
@@ -752,12 +763,36 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                             Text(selectedPersona)
                             Spacer(modifier = Modifier.height(8.dp))
                             Text("Timings You Selected",fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.height(8.dp))
                             Text("Biggest Meal Time: ${biggestMealTime.value}")
                             Text("Sleep Time: ${SleepTime.value}")
                             Text("Wake Time: ${WakeTime.value}")
                         }},
                     confirmButton = {
-                        Button(onClick = { }) {
+                        Button(
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF137A44)),
+                            onClick = { val sharedPrefs = context.getSharedPreferences("my_prefs_$userId", android.content.Context.MODE_PRIVATE)
+                            with(sharedPrefs.edit()) {
+                                putBoolean("fruits", fruits)
+                                putBoolean("vegetables", vegetables)
+                                putBoolean("grains", grains)
+                                putBoolean("red_meat", redMeat)
+                                putBoolean("seafood", seafood)
+                                putBoolean("poultry", poultry)
+                                putBoolean("fish", fish)
+                                putBoolean("eggs", eggs)
+                                putBoolean("nuts_seeds", nutsSeeds)
+                                putString("selected_persona", selectedPersona)
+                                putString("biggest_meal_time", biggestMealTime.value)
+                                putString("sleep_time", SleepTime.value)
+                                putString("wake_time", WakeTime.value)
+                                putBoolean("Redirect", true)
+                                apply()
+                            }
+                            // Dismiss the dialog
+                            saveDialog = false
+                            // Redirect to the home page (Dashboard screen)
+                            context.startActivity(Intent(context, Dashboard::class.java))}) {
                             Text("Save")
                         }
                     }

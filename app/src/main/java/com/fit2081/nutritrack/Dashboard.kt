@@ -161,7 +161,7 @@ fun HomePage() {
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72),),
                 onClick = {
-                    context.startActivity(Intent(context, Questionnaire::class.java))
+                    context.startActivity(Intent(context,Questionnaire::class.java))
                 }
             ) {
                 Text("Edit Details", color = Color.Black)
@@ -276,7 +276,6 @@ fun getNutrientScore(context: Context, userId: String, nutrient: String): String
     return ""
 }
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview()
 @Composable
 fun Insights(navController: NavHostController) {
     val context = LocalContext.current
