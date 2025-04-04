@@ -68,6 +68,7 @@ class Questionnaire : ComponentActivity() {
  *Time Picker Function , function taken from the lab and then modified accordingly
  *
  * Took help of chat gpt and read android documentation to get the data in two digit format
+ *
  */
 fun timePickerFun(context: android.content.Context,mTime: MutableState<String>): TimePickerDialog {
     val mCalendar = Calendar.getInstance()
@@ -96,6 +97,7 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
 @Composable
 fun FoodIntakeQuestionnaire() {
     val context = LocalContext.current
+    var Checkbox_Error by remember { mutableStateOf(false) }
 
     /**
      *
@@ -351,7 +353,8 @@ fun FoodIntakeQuestionnaire() {
                     }
                 }
             }
-
+            if (Checkbox_Error)
+                Text("Please select atlease One", color = Color.Red)
             /**
              *
              * Persona Implementation
@@ -711,9 +714,6 @@ fun FoodIntakeQuestionnaire() {
                     }
 
                 }
-
-
-
             }
             Row {
                 Column(
@@ -739,7 +739,7 @@ fun FoodIntakeQuestionnaire() {
                                 "00:00"
                             }
                             else{
-                                biggestMealTime.value
+                                SleepTime.value
                             },color = Color.Black)
                         }
                     }
@@ -774,7 +774,7 @@ fun FoodIntakeQuestionnaire() {
                                 "00:00"
                             }
                             else{
-                                biggestMealTime.value
+                                WakeTime.value
                             },color = Color.Black)
                         }
                     }
