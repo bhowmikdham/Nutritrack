@@ -4,6 +4,7 @@ import android.app.TimePickerDialog
 import android.content.Intent
 import android.icu.util.Calendar
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -27,7 +28,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -49,10 +49,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.startActivity
 import com.fit2081.nutritrack.ui.theme.NutritrackTheme
-import java.lang.ProcessBuilder.Redirect
-
 
 class Questionnaire : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,7 +62,13 @@ class Questionnaire : ComponentActivity() {
         }
     }
 }
-//function taken from lab and modified accordingly
+
+/**
+ *
+ *Time Picker Function , function taken from the lab and then modified accordingly
+ *
+ * Took help of chat gpt and read android documentation to get the data in two digit format
+ */
 fun timePickerFun(context: android.content.Context,mTime: MutableState<String>): TimePickerDialog {
     val mCalendar = Calendar.getInstance()
     val mHour = mCalendar.get(Calendar.HOUR_OF_DAY)
@@ -82,16 +85,27 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
         false // 'false' means 12-hour format; set 'true' for 24-hour format
     )
 }
+
+/**
+ *
+ * Main Composable for the Questionnaire
+ *
+ */
 @Preview(showBackground = true)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-    fun FoodIntakeQuestionnaire() {
+fun FoodIntakeQuestionnaire() {
     val context = LocalContext.current
+
+    /**
+     *
+     *Shared Preferences and Data Retrieval
+     *
+     */
     val sharedPrefs_global = context.getSharedPreferences("my_prefs", android.content.Context.MODE_PRIVATE)
     //we do this so that we dont collide with diff users and each user have its own shared perf data stored when their questionnaire is loaded or edited
     val userId = sharedPrefs_global.getString("user_id", "") ?: "default"
     val sharedPrefs = context.getSharedPreferences("my_prefs_$userId", android.content.Context.MODE_PRIVATE)
-    // Initialize checkbox states from SharedPreferences, with default value false if not stored
     var fruits by remember { mutableStateOf(sharedPrefs.getBoolean("fruits", false)) }
     var vegetables by remember { mutableStateOf(sharedPrefs.getBoolean("vegetables", false)) }
     var grains by remember { mutableStateOf(sharedPrefs.getBoolean("grains", false)) }
@@ -102,30 +116,46 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
     var eggs by remember { mutableStateOf(sharedPrefs.getBoolean("eggs", false)) }
     var nutsSeeds by remember { mutableStateOf(sharedPrefs.getBoolean("nuts_seeds", false)) }
 
-    // These dialog flags can remain local (they don't need persistence)
+    /**
+     *
+     *Var Initialisation for the AlertDialogs for saving their states
+     *
+     */
     var showHealthyDialog by remember { mutableStateOf(false) }
-    var showIndulgentDialog by remember { mutableStateOf(false) }
-    var showAdventurousDialog by remember { mutableStateOf(false) }
-    var showComfortDialog by remember { mutableStateOf(false) }
+    var showMindfulDialog by remember { mutableStateOf(false) }
+    var showWellnessDialog by remember { mutableStateOf(false) }
     var showBalancedDialog by remember { mutableStateOf(false) }
-    var showPickyDialog by remember { mutableStateOf(false) }
+    var showProcastinatorDialog by remember { mutableStateOf(false) }
+    var showCarefreeDialog by remember { mutableStateOf(false) }
     var saveDialog by remember { mutableStateOf(false) }
 
-    // Initialize time states from SharedPreferences, with "00:00" as the default value
+    /**
+     *
+     *Initialize time states from SharedPreferences
+     *
+     *
+     *
+     */
     val biggestMealTime = remember {
-        mutableStateOf(sharedPrefs.getString("biggest_meal_time", "00:00") ?: "00:00")
+        mutableStateOf(sharedPrefs.getString("biggest_meal_time", "") ?: "")
     }
     val SleepTime = remember {
-        mutableStateOf(sharedPrefs.getString("sleep_time", "00:00") ?: "00:00")
+        mutableStateOf(sharedPrefs.getString("sleep_time", "") ?: "")
     }
     val WakeTime = remember {
-        mutableStateOf(sharedPrefs.getString("wake_time", "00:00") ?: "00:00")
+        mutableStateOf(sharedPrefs.getString("wake_time", "") ?: "")
     }
 
     // Initialize selected persona from SharedPreferences
     var selectedPersona by remember {
         mutableStateOf(sharedPrefs.getString("selected_persona", "") ?: "")
     }
+    /**
+     *
+     * Following is our Composable Code for the Questionnaire
+     *
+     *
+     */
     Scaffold(
         containerColor = Color(0xFFF8F5F5),
         topBar = {
@@ -136,6 +166,7 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                         0xFFC1FF72
                     )
                 ),
+                //this is initialised inside the top Bar
                 navigationIcon = {
                     IconButton(onClick = {
                         // Navigate back to Login
@@ -150,6 +181,11 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
             )
         }
     ) { innerPadding ->
+        /**
+         *
+         *Main Container for the Questionnaire
+         *
+         */
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -161,7 +197,14 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )
-
+            /**
+             *
+             *Thinking
+             *One Row and three Coulmns in it and 3 rows in that, each row which would have
+             * checkboxes with their labels on the right
+             *
+             * Some of the code below you see is taken from the Lab and then modified accordingly
+             */
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -173,6 +216,7 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                     modifier = Modifier.weight(1f),
                     horizontalAlignment = Alignment.Start
                 ) {
+                    //Fruits
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(
                             modifier = Modifier.size(20.dp),
@@ -186,6 +230,7 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                         Text("Fruits")
                     }
                     Spacer(modifier = Modifier.height(8.dp))
+                    //Vegetables
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(
                             modifier = Modifier.size(20.dp),
@@ -199,6 +244,7 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                         Text("Vegetables")
                     }
                     Spacer(modifier = Modifier.height(8.dp))
+                    //Grains
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(
                             modifier = Modifier.size(20.dp),
@@ -217,6 +263,7 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                     modifier = Modifier.weight(1f),
                     horizontalAlignment = Alignment.Start
                 ) {
+                    //Red Meat
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(
                             modifier = Modifier.size(20.dp),
@@ -230,6 +277,7 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                         Text("Red Meat")
                     }
                     Spacer(modifier = Modifier.height(8.dp))
+                    //Seafood
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(
                             modifier = Modifier.size(20.dp),
@@ -243,6 +291,7 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                         Text("Seafood")
                     }
                     Spacer(modifier = Modifier.height(8.dp))
+                    //Poultry
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(
                             modifier = Modifier.size(20.dp),
@@ -261,6 +310,7 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                     modifier = Modifier.weight(1f),
                     horizontalAlignment = Alignment.Start
                 ) {
+                    //Fish
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(
                             modifier = Modifier.size(20.dp),
@@ -274,6 +324,7 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                         Text("Fish")
                     }
                     Spacer(modifier = Modifier.height(8.dp))
+                    //Eggs
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(
                             modifier = Modifier.size(20.dp),
@@ -285,6 +336,7 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                         Text("Eggs")
                     }
                     Spacer(modifier = Modifier.height(8.dp))
+                    //Nutts and Seeds
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(
                             modifier = Modifier.size(20.dp),
@@ -299,32 +351,26 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                     }
                 }
             }
-            //Persona Implementation
-            //My Approach
+
             /**
-             *Text - Persona Heading ("Your Persona")
-             *subText - explaing persona (small font size)
-             * space
-             * state for the modals
-             * make a list for iteraiton(persona headings mapped to their descriptions)
-             * make a general modal loop , which loops on the list of modals
+             *
+             * Persona Implementation
+             *
              */
-            HorizontalDivider(thickness = 2.dp)
+            HorizontalDivider(thickness = 2.dp)// taken from : https://developer.android.com/develop/ui/compose/components/divider
             Text("Your Persona", fontSize = 16.sp, fontWeight = FontWeight.Bold)
             Text(
                 "People can be broadly classified into 6 different types based on their eating preferences. Click on each button below to find out the different types, and select the type that best fits you!",
                 fontSize = 12.sp
             )
             Spacer(modifier = Modifier.height(10.dp))
-            //State
 
-
-            //List for iteration (persona headings mapped to their description)
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // First row: first button right-aligned, second centered, third left-aligned.
+                //Made use of Box for easy alignment
+                //implementation of the Box https://www.youtube.com/watch?v=rw80qs6ErWQ + chatGpt
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Box() {
                         Button(
@@ -339,7 +385,7 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                     Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
                         Button(
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
-                            onClick = { showIndulgentDialog = true },
+                            onClick = { showMindfulDialog = true },
                             shape = RoundedCornerShape(8.dp),
                             contentPadding = PaddingValues(10.dp)
                         ) {
@@ -352,7 +398,7 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                     ) {
                         Button(
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
-                            onClick = { showAdventurousDialog = true },
+                            onClick = { showWellnessDialog = true },
                             shape = RoundedCornerShape(8.dp),
                             contentPadding = PaddingValues(10.dp)
 
@@ -362,12 +408,12 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-                // Second row: first button right-aligned, second centered, third left-aligned.
+                // Second row
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Box() {
                         Button(
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
-                            onClick = { showComfortDialog = true },
+                            onClick = { showBalancedDialog = true },
                             shape = RoundedCornerShape(8.dp),
                             contentPadding = PaddingValues(10.dp)
                         ) {
@@ -377,7 +423,7 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                     Box(modifier = Modifier.weight(0.8f), contentAlignment = Alignment.Center) {
                         Button(
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
-                            onClick = { showBalancedDialog = true },
+                            onClick = { showProcastinatorDialog = true },
                             shape = RoundedCornerShape(9.dp),
                             contentPadding = PaddingValues(10.dp)
                         ) {
@@ -387,7 +433,7 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                     Box(modifier = Modifier.weight(0.5f), contentAlignment = Alignment.Center) {
                         Button(
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
-                            onClick = { showPickyDialog = true },
+                            onClick = { showCarefreeDialog = true },
                             shape = RoundedCornerShape(8.dp),
                             contentPadding = PaddingValues(10.dp)
                         ) {
@@ -396,9 +442,15 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                     }
                 }
             }
+            /**
+             *
+             * Alert Dialog Implementation
+             *
+             * Code taken from Applied Class and Modified accordingly
+             *
+             */
 
-
-            // Discrete AlertDialog for Healthy Eater
+            // AlertDialog for Healthy Eater
             if (showHealthyDialog) {
                 AlertDialog(
                     onDismissRequest = { showHealthyDialog = false },
@@ -416,7 +468,7 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                                     .height(160.dp)
                             )
                             Spacer(modifier = Modifier.height(8.dp))
-                        Text("I’m passionate about healthy eating & health plays a big part in my life. I use social media to follow active lifestyle personalities or get new recipes/exercise ideas. I may even buy superfoods or follow a particular type of diet. I like to think I am super healthy.", textAlign = TextAlign.Center) }},
+                            Text("I’m passionate about healthy eating & health plays a big part in my life. I use social media to follow active lifestyle personalities or get new recipes/exercise ideas. I may even buy superfoods or follow a particular type of diet. I like to think I am super healthy.", textAlign = TextAlign.Center) }},
                     confirmButton = {
                         Button(onClick = { showHealthyDialog = false }) {
                             Text("OK")
@@ -424,10 +476,10 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                     }
                 )
             }
-            // Discrete AlertDialog for Indulgent Eater
-            if (showIndulgentDialog) {
+            // AlertDialog for Mindful Eater
+            if (showMindfulDialog) {
                 AlertDialog(
-                    onDismissRequest = { showIndulgentDialog = false },
+                    onDismissRequest = { showMindfulDialog = false },
                     title = { Text("Mindful Eater", fontWeight = FontWeight.Bold) },
                     text = {
                         Column(
@@ -442,18 +494,18 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                                     .height(160.dp)
                             )
                             Spacer(modifier = Modifier.height(8.dp))
-                        Text("I’m health-conscious and being healthy and eating healthy is important to me. Although health means different things to different people, I make conscious lifestyle decisions about eating based on what I believe healthy means. I look for new recipes and healthy eating information on social media.", textAlign = TextAlign.Center) }},
+                            Text("I’m health-conscious and being healthy and eating healthy is important to me. Although health means different things to different people, I make conscious lifestyle decisions about eating based on what I believe healthy means. I look for new recipes and healthy eating information on social media.", textAlign = TextAlign.Center) }},
                     confirmButton = {
-                        Button(onClick = { showIndulgentDialog = false }) {
+                        Button(onClick = { showMindfulDialog = false }) {
                             Text("OK")
                         }
                     }
                 )
             }
-            // Discrete AlertDialog for Adventurous Eater
-            if (showAdventurousDialog) {
+            // AlertDialog for Wellness Striver
+            if (showWellnessDialog) {
                 AlertDialog(
-                    onDismissRequest = { showAdventurousDialog = false },
+                    onDismissRequest = { showWellnessDialog = false },
                     title = { Text("Welness Striver", fontWeight = FontWeight.Bold) },
                     text = { Column(
                         verticalArrangement = Arrangement.Center,
@@ -469,16 +521,16 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                         Spacer(modifier = Modifier.height(8.dp))
                         Text("I aspire to be healthy (but struggle sometimes). Healthy eating is hard work! I’ve tried to improve my diet, but always find things that make it difficult to stick with the changes. Sometimes I notice recipe ideas or healthy eating hacks, and if it seems easy enough, I’ll give it a go.", textAlign = TextAlign.Center) }},
                     confirmButton = {
-                        Button(onClick = { showAdventurousDialog = false }) {
+                        Button(onClick = { showWellnessDialog = false }) {
                             Text("OK")
                         }
                     }
                 )
             }
-            // Discrete AlertDialog for Comfort Food Lover
-            if (showComfortDialog) {
+            // AlertDialog for Balance Seeker
+            if (showBalancedDialog) {
                 AlertDialog(
-                    onDismissRequest = { showComfortDialog = false },
+                    onDismissRequest = { showBalancedDialog = false },
                     title = { Text("Balance Seeker", fontWeight = FontWeight.Bold) },
                     text = {
                         Column(
@@ -493,18 +545,18 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                                     .height(160.dp)
                             )
                             Spacer(modifier = Modifier.height(8.dp))
-                        Text("I try and live a balanced lifestyle, and I think that all foods are okay in moderation. I shouldn’t have to feel guilty about eating a piece of cake now and again. I get all sorts of inspiration from social media like finding out about new restaurants, fun recipes and sometimes healthy eating tips.", textAlign = TextAlign.Center) }},
+                            Text("I try and live a balanced lifestyle, and I think that all foods are okay in moderation. I shouldn’t have to feel guilty about eating a piece of cake now and again. I get all sorts of inspiration from social media like finding out about new restaurants, fun recipes and sometimes healthy eating tips.", textAlign = TextAlign.Center) }},
                     confirmButton = {
-                        Button(onClick = { showComfortDialog = false }) {
+                        Button(onClick = { showBalancedDialog = false }) {
                             Text("OK")
                         }
                     }
                 )
             }
-            // Discrete AlertDialog for Balanced Eater
-            if (showBalancedDialog) {
+            // AlertDialog for Health Procrastinator
+            if (showProcastinatorDialog) {
                 AlertDialog(
-                    onDismissRequest = { showBalancedDialog = false },
+                    onDismissRequest = { showProcastinatorDialog = false },
                     title = { Text("Health Procastinator", fontWeight = FontWeight.Bold) },
                     text = { Column(
                         verticalArrangement = Arrangement.Center,
@@ -520,16 +572,16 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                         Spacer(modifier = Modifier.height(8.dp))
                         Text("I’m contemplating healthy eating but it’s not a priority for me right now. I know the basics about what it means to be healthy, but it doesn’t seem relevant to me right now. I have taken a few steps to be healthier but I am not motivated to make it a high priority because I have too many other things going on in my life.", textAlign = TextAlign.Center) }},
                     confirmButton = {
-                        Button(onClick = { showBalancedDialog = false }) {
+                        Button(onClick = { showProcastinatorDialog = false }) {
                             Text("OK")
                         }
                     }
                 )
             }
-            // Discrete AlertDialog for Picky Eater
-            if (showPickyDialog) {
+            // AlertDialog for Food Carefree
+            if (showCarefreeDialog) {
                 AlertDialog(
-                    onDismissRequest = { showPickyDialog = false },
+                    onDismissRequest = { showCarefreeDialog = false },
                     title = { Text("Food Carefree", fontWeight = FontWeight.Bold) },
                     text = {
                         Column(
@@ -544,9 +596,9 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                                     .height(160.dp)
                             )
                             Spacer(modifier = Modifier.height(8.dp))
-                        Text("I’m not bothered about healthy eating. I don’t really see the point and I don’t think about it. I don’t really notice healthy eating tips or recipes and I don’t care what I eat.", textAlign = TextAlign.Center) }},
+                            Text("I’m not bothered about healthy eating. I don’t really see the point and I don’t think about it. I don’t really notice healthy eating tips or recipes and I don’t care what I eat.", textAlign = TextAlign.Center) }},
                     confirmButton = {
-                        Button(onClick = { showPickyDialog = false }) {
+                        Button(onClick = { showCarefreeDialog = false }) {
                             Text("OK")
                         }
                     }
@@ -579,13 +631,13 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                     "Wellness Striver",
                     "Balanced Seeker",
                     "Health Procrastinator",
-                    "Picky Eater"
+                    "Food Carefree"
                 )
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                    )
-                    {
+                )
+                {//Code for DropDown menu taken from applied and Modified accordingly
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -604,7 +656,7 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                         onDismissRequest = { expanded = false },
                         modifier = Modifier.fillMaxWidth()
                     )
-                        {
+                    {
                         personas.forEach { persona ->
                             DropdownMenuItem(
                                 text = { Text(persona) },
@@ -615,115 +667,132 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                             )
                         }
                     }
-                    }
-
                 }
-                Spacer(modifier = Modifier.height(15.dp))
-                Text("Timings", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(10.dp))
-                Row {
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        horizontalAlignment = Alignment.Start){
+
+            }
+            /**
+             *
+             * Timings Implementation
+             *
+             */
+            Spacer(modifier = Modifier.height(15.dp))
+            Text("Timings", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(10.dp))
+            //taken help from ChatGpt to help me position things well and use of .show()
+            Row {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.Start){
                     Text("What time of day approx. do you normally eat your biggest meal?",fontSize = 13.sp)
-                    }
-                    Column(
-                        modifier = Modifier
-                            .weight(1f),
-                        horizontalAlignment = Alignment.End){
-                        Button(
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
-                            shape = RoundedCornerShape(8.dp),
-                            onClick = { timePickerFun(context,mTime = biggestMealTime).show() }
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.DateRange,
-                                    contentDescription = "Calendar Icon",
-                                    tint = Color(0xFF137A44))
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(text = biggestMealTime.value,color = Color.Black)
-                            }
-                        }
-
-                    }
-
-
-
                 }
-                Row {
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        horizontalAlignment = Alignment.CenterHorizontally){
-                    Text("What time of day approx. do you normally eat your biggest meal?", fontSize = 13.sp)
-                    }
-                    Column(
-                        modifier = Modifier.weight(0.7f),
-                        horizontalAlignment = Alignment.End){
-                        Button(
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
-                            shape = RoundedCornerShape(8.dp),
-                            onClick = { timePickerFun(context,mTime = SleepTime).show() }
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.DateRange,
-                                    contentDescription = "Calendar Icon",
-                                    tint = Color(0xFF137A44))
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(text = SleepTime.value, color = Color.Black)
-                            }
-                        }
-
-                    }
-
-
-
-
-                }
-                Row {
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        horizontalAlignment = Alignment.Start){
-                        Text("What time of day approx. do you normally eat your biggest meal?", fontSize = 13.sp)
-                    }
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        horizontalAlignment = Alignment.End){
-                        Button(
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
-                            shape = RoundedCornerShape(8.dp),
-                            onClick = { timePickerFun(context,mTime = WakeTime).show() }
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.DateRange,
-                                    contentDescription = "Calendar Icon",
-                                    tint = Color(0xFF137A44))
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(text = WakeTime.value,color = Color.Black)
-                            }
-                        }
-
-                    }
-
-
-
-
-                }
-
-
-                Button(
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF137A44)),
-                    shape = RoundedCornerShape(10.dp),
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    onClick = { saveDialog = true}
-
-                ){Text("Review And Continue",fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                        .weight(1f),
+                    horizontalAlignment = Alignment.End){
+                    Button(
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
+                        shape = RoundedCornerShape(8.dp),
+                        onClick = { timePickerFun(context,mTime = biggestMealTime).show() }
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.DateRange,
+                                contentDescription = "Calendar Icon",
+                                tint = Color(0xFF137A44))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                if (biggestMealTime.value.isEmpty()){
+                                    "00:00"
+                                }
+                                else{
+                                biggestMealTime.value
+                                },color = Color.Black)
+                        }
+                    }
 
                 }
+
+
+
+            }
+            Row {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally){
+                    Text("What time of day approx. do you normally eat your biggest meal?", fontSize = 13.sp)
+                }
+                Column(
+                    modifier = Modifier.weight(0.7f),
+                    horizontalAlignment = Alignment.End){
+                    Button(
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
+                        shape = RoundedCornerShape(8.dp),
+                        onClick = { timePickerFun(context,mTime = SleepTime).show() }
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.DateRange,
+                                contentDescription = "Calendar Icon",
+                                tint = Color(0xFF137A44))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(if (SleepTime.value.isEmpty()){
+                                "00:00"
+                            }
+                            else{
+                                biggestMealTime.value
+                            },color = Color.Black)
+                        }
+                    }
+
+                }
+
+
+
+
+            }
+            Row {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.Start){
+                    Text("What time of day approx. do you normally eat your biggest meal?", fontSize = 13.sp)
+                }
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.End){
+                    Button(
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
+                        shape = RoundedCornerShape(8.dp),
+                        onClick = { timePickerFun(context,mTime = WakeTime).show() }
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.DateRange,
+                                contentDescription = "Calendar Icon",
+                                tint = Color(0xFF137A44))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(if (WakeTime.value.isEmpty()){
+                                "00:00"
+                            }
+                            else{
+                                biggestMealTime.value
+                            },color = Color.Black)
+                        }
+                    }
+                }
+            }
+
+            Button(
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF137A44)),
+                shape = RoundedCornerShape(10.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                onClick = { saveDialog = true}
+
+            ){Text("Review And Continue",fontSize = 16.sp, fontWeight = FontWeight.Bold)
+
+            }
+            //Creating a dialog box for confirmation of the information entered
             if (saveDialog) {
                 AlertDialog(
                     onDismissRequest = { saveDialog = false },
@@ -768,38 +837,83 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
                             Text("Sleep Time: ${SleepTime.value}")
                             Text("Wake Time: ${WakeTime.value}")
                         }},
+
+                    /**
+                     *
+                     *When button is pressed the data gets saved into the shred preference of that particular logged in user
+                     * and the user is directed towards the Home screen
+                     *
+                     */
                     confirmButton = {
                         Button(
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF137A44)),
-                            onClick = { val sharedPrefs = context.getSharedPreferences("my_prefs_$userId", android.content.Context.MODE_PRIVATE)
-                            with(sharedPrefs.edit()) {
-                                putBoolean("fruits", fruits)
-                                putBoolean("vegetables", vegetables)
-                                putBoolean("grains", grains)
-                                putBoolean("red_meat", redMeat)
-                                putBoolean("seafood", seafood)
-                                putBoolean("poultry", poultry)
-                                putBoolean("fish", fish)
-                                putBoolean("eggs", eggs)
-                                putBoolean("nuts_seeds", nutsSeeds)
-                                putString("selected_persona", selectedPersona)
-                                putString("biggest_meal_time", biggestMealTime.value)
-                                putString("sleep_time", SleepTime.value)
-                                putString("wake_time", WakeTime.value)
-                                putBoolean("Redirect", true)
-                                apply()
-                            }
-                            // Dismiss the dialog
-                            saveDialog = false
-                            // Redirect to the home page (Dashboard screen)
-                            context.startActivity(Intent(context, Dashboard::class.java))}) {
-                            Text("Save")
-                        }
+                            onClick = {
+                                val sharedPrefs = context.getSharedPreferences(
+                                    "my_prefs_$userId",
+                                    android.content.Context.MODE_PRIVATE
+                                )
+                                with(sharedPrefs.edit()) {
+                                    putBoolean("fruits", fruits)
+                                    putBoolean("vegetables", vegetables)
+                                    putBoolean("grains", grains)
+                                    putBoolean("red_meat", redMeat)
+                                    putBoolean("seafood", seafood)
+                                    putBoolean("poultry", poultry)
+                                    putBoolean("fish", fish)
+                                    putBoolean("eggs", eggs)
+                                    putBoolean("nuts_seeds", nutsSeeds)
+                                    putString("selected_persona", selectedPersona)
+                                    putString("biggest_meal_time", biggestMealTime.value)
+                                    putString("sleep_time", SleepTime.value)
+                                    putString("wake_time", WakeTime.value)
+                                    apply()
+                                }
+                                // Dismiss the dialog
+                                saveDialog = false
+                                // VALIDATION THAT THE USER HAS FILLED ALL THE REQUIRED FIELDS
+                                if ((fruits || vegetables || grains || redMeat || seafood || poultry || fish || eggs || nutsSeeds) && selectedPersona.isNotEmpty() && biggestMealTime.value.isNotEmpty() && SleepTime.value.isNotEmpty() && WakeTime.value.isNotEmpty()) {
+                                    val sharedPrefs = context.getSharedPreferences(
+                                        "my_prefs_$userId",
+                                        android.content.Context.MODE_PRIVATE
+                                    )
+                                    with(sharedPrefs.edit()){
+                                    putBoolean("Redirect", true)}
+                                    context.startActivity(Intent(context, Dashboard::class.java))
+                                }
+                                if (!(fruits || vegetables || grains || redMeat || seafood || poultry || fish || eggs || nutsSeeds)){
+                                    Toast.makeText(context, "Please Fill the given Categories", Toast.LENGTH_LONG).show()
+                                }
+                                else if (!(selectedPersona.isNotEmpty())){
+                                    Toast.makeText(context, "Please Fill the given Categories", Toast.LENGTH_LONG).show()
+                                }
+                                else if (!(biggestMealTime.value.isNotEmpty())){
+                                    Toast.makeText(context, "Please Fill the given Categories", Toast.LENGTH_LONG).show()
+
+                                }
+                                else if (!(SleepTime.value.isNotEmpty())) {
+                                    Toast.makeText(
+                                        context,
+                                        "Please Fill the given Categories",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                                else if (!(WakeTime.value.isNotEmpty())) {
+                                    Toast.makeText(
+                                        context,
+                                        "Please Fill the given Categories",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+
+                            })
+
+                                {
+                            Text("Save") }
                     }
                 )
             }
-            }
-        }}
+        }
+    }}
 
 
 

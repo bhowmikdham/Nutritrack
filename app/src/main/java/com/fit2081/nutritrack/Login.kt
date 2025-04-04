@@ -73,10 +73,10 @@ fun validateUser(context: Context, userId: String, phoneNumber: String): Boolean
                     isFirstLine = false
                     return@forEach
                 }
-                val tokens = line.split(",")
-                if (tokens.size >= 2) {
-                    val csvPhoneNumber = tokens[0].trim()
-                    val csvUserId = tokens[1].trim()
+                val csv_value = line.split(",")
+                if (csv_value.size >= 2) {
+                    val csvPhoneNumber = csv_value[0].trim()
+                    val csvUserId = csv_value[1].trim()
                     if (csvUserId == userId && csvPhoneNumber == phoneNumber) {
                         return true
                     }
@@ -88,6 +88,11 @@ fun validateUser(context: Context, userId: String, phoneNumber: String): Boolean
     }
     return false
 }
+
+/**
+ * USER FETCH: this is a function to fetch the user ids from the csv file
+ * when called returns all the user ID from the CSV file
+ */
 fun getUser_ID(context : Context):List<String> {
     val user_id = mutableListOf<String>()
     try {
@@ -102,43 +107,55 @@ fun getUser_ID(context : Context):List<String> {
     return user_id
 
 }
-//INPUT VALIDATION:This is the function for validating Phone Number
+/**
+ *INPUT VALIDATION:This is the function for validating Phone Number
+ * partial help taken from gen AI and modified accordingly
+ */
 fun isPhoneRegistered(context: Context, phoneNumber: String): Boolean {
     return try {
         context.assets.open("accounts.csv").bufferedReader().useLines { lines ->
             // Skip the header row
             lines.drop(1).any { line ->
-                val tokens = line.split(",")
+                val csv_value = line.split(",")
                 // Compare the phone number in column 0
-                tokens.isNotEmpty() && tokens[0].trim() == phoneNumber
+                csv_value.isNotEmpty() && csv_value[0].trim() == phoneNumber
             }
         }
     } catch (e: Exception) {
-        // Log or handle error
         false
     }
 }
+/**
+ *INPUT VALIDATION:This is the function for validating User_ID
+ * partial help taken from gen AI and modified accordingly
+ */
 fun isUserRegistered(context: Context, userId: String): Boolean {
     return try {
         context.assets.open("accounts.csv").bufferedReader().useLines { lines ->
             // Skip the header row
             lines.drop(1).any { line ->
-                val tokens = line.split(",")
+                val csv_value = line.split(",")
                 // Compare the phone number in column 0
-                tokens.isNotEmpty() && tokens[1].trim() == userId
+                csv_value.isNotEmpty() && csv_value[1].trim() == userId
             }
         }
     } catch (e: Exception) {
-        // Log or handle error
         false
     }
 }
 
+/**
+ *
+ * Following is the composable that helps in forming the Login Page
+ *
+ *
+ */
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
 fun LoginScreen(modifier: Modifier = Modifier) {
+    //Variable declaration
     val context = LocalContext.current
     var userId by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
@@ -151,23 +168,25 @@ fun LoginScreen(modifier: Modifier = Modifier) {
         color = Color(0xFFF8F5F5)
     )
     {
-        //Box(modifier = Modifier.fillMaxSize()) {
-            // Background color covering the top section
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp) // Adjust this height to match the top background in the sample image
-                    .background(Color(0xFFC1FF72)) // Change this to your desired color
+                    .height(200.dp)
+                    .background(Color(0xFFC1FF72))
             )
 
-            // The main login container
-            Column(
+        /**
+         *
+         * MAIN LOGIN CONTAINER
+         *
+         */
+        Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = 120.dp) // Adjust to create space from the top background
-                    .clip(RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp)) // Rounded corners at the top
-                    .background(Color.White) // White background for the login form
-                    .padding(horizontal = 16.dp, vertical = 24.dp), // Padding inside the form
+                    .padding(top = 120.dp)
+                    .clip(RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp))
+                    .background(Color.White)
+                    .padding(horizontal = 16.dp, vertical = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top
             ) {
@@ -184,7 +203,15 @@ fun LoginScreen(modifier: Modifier = Modifier) {
                 // Username Field
                 val userIds = remember { getUser_ID(context) }
                 var expanded by remember { mutableStateOf(false) }
-
+                /**
+                 *
+                 * The use of the Exposed Menu Bar is taken from external sources :
+                 *
+                 * https://medium.com/@german220291/building-a-custom-exposed-dropdown-menu-with-jetpack-compose-d65232535bf2
+                 *
+                 * and Modified Accordingly
+                 *
+                 */
                 ExposedDropdownMenuBox(
                     expanded = expanded,
                     onExpandedChange = { expanded = !expanded }
@@ -217,6 +244,7 @@ fun LoginScreen(modifier: Modifier = Modifier) {
                         }
                     }
                 }
+                //USER ID VALIDATION
                 if (userIdError) {
                     Text(
                         text = "Invalid User ID",
@@ -228,7 +256,13 @@ fun LoginScreen(modifier: Modifier = Modifier) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Password Field
+                /**
+                 *
+                 * PASSWORD FIELD
+                 *
+                 * Customisation Functions Taken from Applied and Android Developer Documentations
+                 *
+                 */
                 OutlinedTextField(
                     value = phoneNumber,
                     onValueChange = {
@@ -237,10 +271,11 @@ fun LoginScreen(modifier: Modifier = Modifier) {
                                     },
                     label = { Text("Phone number") },
                     isError = phoneError,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),//Added this for a more smooth User Experience
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
+                //PHONE NUMBER VALIDATION
                 if (phoneError) {
                     Text(
                         text = "Phone Number Not Registered",
@@ -250,7 +285,7 @@ fun LoginScreen(modifier: Modifier = Modifier) {
                 }
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Information Text
+                // INFORMATORY TEXT
                 Text(
                     text = "This app is only for pre-registered users. Please have your ID and phone number handy before continuing.",
                     fontSize = 12.sp,
@@ -260,7 +295,11 @@ fun LoginScreen(modifier: Modifier = Modifier) {
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Continue Button
+                /**
+                 *
+                 * CONTINUE BUTTON
+                 *
+                 */
                 Button(
                     shape = RoundedCornerShape(10.dp),
                     modifier = Modifier
@@ -280,6 +319,14 @@ fun LoginScreen(modifier: Modifier = Modifier) {
                             val sharedPrefs_global = context.getSharedPreferences("my_prefs", android.content.Context.MODE_PRIVATE)
                             //we do this so that we dont collide with diff users and each user have its own shared perf data stored when their questionnaire is loaded or edited
                             val userId = sharedPrefs_global.getString("user_id", "") ?: "default"
+
+                            /**
+                             *
+                             *
+                             * FOLLOWING IS DONE TO AVOID TEH USER REDIRECTION ISSUE, SO THAT THE USER CAN BE REDIRECTED TO HOME PAGE
+                             * IF HE HAS ALREADY COMPLETED THE QUESTIONNAIRE
+                             *
+                             */
                             val sharedPrefs_user = context.getSharedPreferences("my_prefs_$userId", android.content.Context.MODE_PRIVATE)
                             val Redirect = sharedPrefs_user.getBoolean("Redirect", false)
                             if (Redirect){
@@ -287,14 +334,16 @@ fun LoginScreen(modifier: Modifier = Modifier) {
                             else {context.startActivity(Intent(context,Questionnaire::class.java))}
                         }
                         else if (userIdError || phoneError) {
+                            //IF THE USER ID OR PHONE NUMBER IS NOT VALID WE DISPLAY THE FOLLOWING TOAST MESSAGE
                             Toast.makeText(context, "Please Enter a Valid User ID or Phone Number", Toast.LENGTH_LONG).show()
                         }
                         else {
+                            //WHEN INCORRECT CREDENTIALS ARE ENTERED WE DISPLAY THE FOLLOWING TOAST MESSAGE
                             Toast.makeText(context, "Incorrect Credentials", Toast.LENGTH_LONG).show()
                         }
                     }
                 ) {
-                    Text("Continue",color = Color(0xFF000000))
+                    Text("Continue",color = Color.Black)
                 }
             }
         }
