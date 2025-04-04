@@ -12,6 +12,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -70,7 +71,7 @@ class Questionnaire : ComponentActivity() {
  * Took help of chat gpt and read android documentation to get the data in two digit format
  *
  */
-fun timePickerFun(context: android.content.Context,mTime: MutableState<String>): TimePickerDialog {
+fun timePickerFun(context: android.content.Context, mTime: MutableState<String>): TimePickerDialog {
     val mCalendar = Calendar.getInstance()
     val mHour = mCalendar.get(Calendar.HOUR_OF_DAY)
     val mMinute = mCalendar.get(Calendar.MINUTE)
@@ -98,6 +99,7 @@ fun timePickerFun(context: android.content.Context,mTime: MutableState<String>):
 fun FoodIntakeQuestionnaire() {
     val context = LocalContext.current
     var Checkbox_Error by remember { mutableStateOf(false) }
+    var Persona_Error by remember { mutableStateOf(false) }
 
     /**
      *
@@ -156,7 +158,6 @@ fun FoodIntakeQuestionnaire() {
      *
      * Following is our Composable Code for the Questionnaire
      *
-     *
      */
     Scaffold(
         containerColor = Color(0xFFF8F5F5),
@@ -183,737 +184,745 @@ fun FoodIntakeQuestionnaire() {
             )
         }
     ) { innerPadding ->
-        /**
-         *
-         *Main Container for the Questionnaire
-         *
-         */
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(16.dp)
                 .fillMaxSize(),
+            contentPadding = PaddingValues(16.dp)
         ) {
-            Text(
-                "Tick all the food categories you can eat",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
-            )
-            /**
-             *
-             *Thinking
-             *One Row and three Coulmns in it and 3 rows in that, each row which would have
-             * checkboxes with their labels on the right
-             *
-             * Some of the code below you see is taken from the Lab and then modified accordingly
-             */
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                // First Column: Fruits, Vegetables, Grains
-                Column(
-                    modifier = Modifier.weight(1f),
-                    horizontalAlignment = Alignment.Start
-                ) {
-                    //Fruits
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            modifier = Modifier.size(20.dp),
-                            checked = fruits,
-                            onCheckedChange = { fruits = it },
-                            colors = CheckboxDefaults.colors(
-                                checkedColor = Color(0xFF545454)
-                            )
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Fruits")
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    //Vegetables
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            modifier = Modifier.size(20.dp),
-                            checked = vegetables,
-                            onCheckedChange = { vegetables = it },
-                            colors = CheckboxDefaults.colors(
-                                checkedColor = Color(0xFF545454)
-                            )
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Vegetables")
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    //Grains
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            modifier = Modifier.size(20.dp),
-                            checked = grains,
-                            onCheckedChange = { grains = it },
-                            colors = CheckboxDefaults.colors(
-                                checkedColor = Color(0xFF545454)
-                            )
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Grains")
-                    }
-                }
-                // Second Column: Red Meat, Seafood, Poultry
-                Column(
-                    modifier = Modifier.weight(1f),
-                    horizontalAlignment = Alignment.Start
-                ) {
-                    //Red Meat
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            modifier = Modifier.size(20.dp),
-                            checked = redMeat,
-                            onCheckedChange = { redMeat = it },
-                            colors = CheckboxDefaults.colors(
-                                checkedColor = Color(0xFF545454)
-                            )
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Red Meat")
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    //Seafood
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            modifier = Modifier.size(20.dp),
-                            checked = seafood,
-                            onCheckedChange = { seafood = it },
-                            colors = CheckboxDefaults.colors(
-                                checkedColor = Color(0xFF545454)
-                            )
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Seafood")
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    //Poultry
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            modifier = Modifier.size(20.dp),
-                            checked = poultry,
-                            onCheckedChange = { poultry = it },
-                            colors = CheckboxDefaults.colors(
-                                checkedColor = Color(0xFF545454)
-                            )
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Poultry")
-                    }
-                }
-                // Third Column: Fish, Eggs, Nuts/Seeds
-                Column(
-                    modifier = Modifier.weight(1f),
-                    horizontalAlignment = Alignment.Start
-                ) {
-                    //Fish
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            modifier = Modifier.size(20.dp),
-                            checked = fish,
-                            onCheckedChange = { fish = it },
-                            colors = CheckboxDefaults.colors(
-                                checkedColor = Color(0xFF545454)
-                            )
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Fish")
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    //Eggs
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            modifier = Modifier.size(20.dp),
-                            checked = eggs,
-                            onCheckedChange = { eggs = it },
-                            colors = CheckboxDefaults.colors(checkedColor = Color(0xFF545454))
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Eggs")
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    //Nutts and Seeds
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            modifier = Modifier.size(20.dp),
-                            checked = nutsSeeds,
-                            onCheckedChange = { nutsSeeds = it },
-                            colors = CheckboxDefaults.colors(
-                                checkedColor = Color(0xFF545454)
-                            )
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Nuts/Seeds")
-                    }
-                }
-            }
-            if (Checkbox_Error)
-                Text("Please select atlease One", color = Color.Red)
-            /**
-             *
-             * Persona Implementation
-             *
-             */
-            HorizontalDivider(thickness = 2.dp)// taken from : https://developer.android.com/develop/ui/compose/components/divider
-            Text("Your Persona", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            Text(
-                "People can be broadly classified into 6 different types based on their eating preferences. Click on each button below to find out the different types, and select the type that best fits you!",
-                fontSize = 12.sp
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                //Made use of Box for easy alignment
-                //implementation of the Box https://www.youtube.com/watch?v=rw80qs6ErWQ + chatGpt
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Box() {
-                        Button(
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
-                            onClick = { showHealthyDialog = true },
-                            shape = RoundedCornerShape(8.dp),
-                            contentPadding = PaddingValues(10.dp)
-                        ) {
-                            Text("Health Devotee", fontSize = 11.sp, color = Color.Black)
-                        }
-                    }
-                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                        Button(
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
-                            onClick = { showMindfulDialog = true },
-                            shape = RoundedCornerShape(8.dp),
-                            contentPadding = PaddingValues(10.dp)
-                        ) {
-                            Text("Mindful Eater", fontSize = 11.sp,color = Color.Black)
-                        }
-                    }
-                    Box(
-                        modifier = Modifier.weight(1f),
-                        contentAlignment = Alignment.CenterEnd
-                    ) {
-                        Button(
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
-                            onClick = { showWellnessDialog = true },
-                            shape = RoundedCornerShape(8.dp),
-                            contentPadding = PaddingValues(10.dp)
-
-                        ) {
-                            Text("Welness Striver", fontSize = 11.sp,color = Color.Black)
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                // Second row
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Box() {
-                        Button(
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
-                            onClick = { showBalancedDialog = true },
-                            shape = RoundedCornerShape(8.dp),
-                            contentPadding = PaddingValues(10.dp)
-                        ) {
-                            Text("Balance Seeker", fontSize = 11.sp,color = Color.Black)
-                        }
-                    }
-                    Box(modifier = Modifier.weight(0.8f), contentAlignment = Alignment.Center) {
-                        Button(
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
-                            onClick = { showProcastinatorDialog = true },
-                            shape = RoundedCornerShape(9.dp),
-                            contentPadding = PaddingValues(10.dp)
-                        ) {
-                            Text("Health Procastinator", fontSize = 11.sp, color = Color.Black)
-                        }
-                    }
-                    Box(modifier = Modifier.weight(0.5f), contentAlignment = Alignment.Center) {
-                        Button(
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
-                            onClick = { showCarefreeDialog = true },
-                            shape = RoundedCornerShape(8.dp),
-                            contentPadding = PaddingValues(10.dp)
-                        ) {
-                            Text("Food Carefree", fontSize = 11.sp, color = Color.Black)
-                        }
-                    }
-                }
-            }
-            /**
-             *
-             * Alert Dialog Implementation
-             *
-             * Code taken from Applied Class and Modified accordingly
-             *
-             */
-
-            // AlertDialog for Healthy Eater
-            if (showHealthyDialog) {
-                AlertDialog(
-                    onDismissRequest = { showHealthyDialog = false },
-                    title = { Text("Healthy Eater", fontWeight = FontWeight.Bold) },
-                    text = {
-                        Column(
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.persona_1),
-                                contentDescription = "Balance Seeker",
-                                contentScale = ContentScale.Fit,
-                                modifier = Modifier
-                                    .height(160.dp)
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text("I’m passionate about healthy eating & health plays a big part in my life. I use social media to follow active lifestyle personalities or get new recipes/exercise ideas. I may even buy superfoods or follow a particular type of diet. I like to think I am super healthy.", textAlign = TextAlign.Center) }},
-                    confirmButton = {
-                        Button(onClick = { showHealthyDialog = false }) {
-                            Text("OK")
-                        }
-                    }
+            item {
+                Text(
+                    "Tick all the food categories you can eat",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
                 )
-            }
-            // AlertDialog for Mindful Eater
-            if (showMindfulDialog) {
-                AlertDialog(
-                    onDismissRequest = { showMindfulDialog = false },
-                    title = { Text("Mindful Eater", fontWeight = FontWeight.Bold) },
-                    text = {
-                        Column(
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.persona_2),
-                                contentDescription = "Balance Seeker",
-                                contentScale = ContentScale.Fit,
-                                modifier = Modifier
-                                    .height(160.dp)
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text("I’m health-conscious and being healthy and eating healthy is important to me. Although health means different things to different people, I make conscious lifestyle decisions about eating based on what I believe healthy means. I look for new recipes and healthy eating information on social media.", textAlign = TextAlign.Center) }},
-                    confirmButton = {
-                        Button(onClick = { showMindfulDialog = false }) {
-                            Text("OK")
-                        }
-                    }
-                )
-            }
-            // AlertDialog for Wellness Striver
-            if (showWellnessDialog) {
-                AlertDialog(
-                    onDismissRequest = { showWellnessDialog = false },
-                    title = { Text("Welness Striver", fontWeight = FontWeight.Bold) },
-                    text = { Column(
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.persona_3),
-                            contentDescription = "Balance Seeker",
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier
-                                .height(160.dp)
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text("I aspire to be healthy (but struggle sometimes). Healthy eating is hard work! I’ve tried to improve my diet, but always find things that make it difficult to stick with the changes. Sometimes I notice recipe ideas or healthy eating hacks, and if it seems easy enough, I’ll give it a go.", textAlign = TextAlign.Center) }},
-                    confirmButton = {
-                        Button(onClick = { showWellnessDialog = false }) {
-                            Text("OK")
-                        }
-                    }
-                )
-            }
-            // AlertDialog for Balance Seeker
-            if (showBalancedDialog) {
-                AlertDialog(
-                    onDismissRequest = { showBalancedDialog = false },
-                    title = { Text("Balance Seeker", fontWeight = FontWeight.Bold) },
-                    text = {
-                        Column(
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.persona_4),
-                                contentDescription = "Balance Seeker",
-                                contentScale = ContentScale.Fit,
-                                modifier = Modifier
-                                    .height(160.dp)
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text("I try and live a balanced lifestyle, and I think that all foods are okay in moderation. I shouldn’t have to feel guilty about eating a piece of cake now and again. I get all sorts of inspiration from social media like finding out about new restaurants, fun recipes and sometimes healthy eating tips.", textAlign = TextAlign.Center) }},
-                    confirmButton = {
-                        Button(onClick = { showBalancedDialog = false }) {
-                            Text("OK")
-                        }
-                    }
-                )
-            }
-            // AlertDialog for Health Procrastinator
-            if (showProcastinatorDialog) {
-                AlertDialog(
-                    onDismissRequest = { showProcastinatorDialog = false },
-                    title = { Text("Health Procastinator", fontWeight = FontWeight.Bold) },
-                    text = { Column(
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.persona_5),
-                            contentDescription = "Balance Seeker",
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier
-                                .height(160.dp)
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text("I’m contemplating healthy eating but it’s not a priority for me right now. I know the basics about what it means to be healthy, but it doesn’t seem relevant to me right now. I have taken a few steps to be healthier but I am not motivated to make it a high priority because I have too many other things going on in my life.", textAlign = TextAlign.Center) }},
-                    confirmButton = {
-                        Button(onClick = { showProcastinatorDialog = false }) {
-                            Text("OK")
-                        }
-                    }
-                )
-            }
-            // AlertDialog for Food Carefree
-            if (showCarefreeDialog) {
-                AlertDialog(
-                    onDismissRequest = { showCarefreeDialog = false },
-                    title = { Text("Food Carefree", fontWeight = FontWeight.Bold) },
-                    text = {
-                        Column(
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.persona_6),
-                                contentDescription = "Balance Seeker",
-                                contentScale = ContentScale.Fit,
-                                modifier = Modifier
-                                    .height(160.dp)
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text("I’m not bothered about healthy eating. I don’t really see the point and I don’t think about it. I don’t really notice healthy eating tips or recipes and I don’t care what I eat.", textAlign = TextAlign.Center) }},
-                    confirmButton = {
-                        Button(onClick = { showCarefreeDialog = false }) {
-                            Text("OK")
-                        }
-                    }
-                )
-            }
-            Spacer(modifier = Modifier.padding(3.dp))
-            HorizontalDivider(thickness = 2.dp)// taken from https://developer.android.com/develop/ui/compose/components/divider
-            Spacer(modifier = Modifier.padding(3.dp))
-            Text(
-                "Which persona suits you the best?",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border( //discovered this function on the Android Documentation
-                        width = 1.dp,
-                        color = Color.Gray,
-                        shape = RoundedCornerShape(8.dp)
-                    )
-
-            ) {
-
-                var expanded by remember { mutableStateOf(false) }
-                val personas = listOf(
-                    "Healthy Devotee",
-                    "Mindful Eater",
-                    "Wellness Striver",
-                    "Balanced Seeker",
-                    "Health Procrastinator",
-                    "Food Carefree"
-                )
-                Box(
+                /**
+                 *
+                 *Thinking
+                 *One Row and three Coulmns in it and 3 rows in that, each row which would have
+                 * checkboxes with their labels on the right
+                 *
+                 * Some of the code below you see is taken from the Lab and then modified accordingly
+                 */
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                )
-                {//Code for DropDown menu taken from applied and Modified accordingly
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { expanded = true }
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    )
-                    {
-                        Text(selectedPersona)
-                        Icon(Icons.Default.ArrowDropDown, contentDescription = "Dropdown")
-                    }
-
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    {
-                        personas.forEach { persona ->
-                            DropdownMenuItem(
-                                text = { Text(persona) },
-                                onClick = {
-                                    selectedPersona = persona
-                                    expanded = false
-                                }
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    // First Column: Fruits, Vegetables, Grains
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        //Fruits
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(
+                                modifier = Modifier.size(20.dp),
+                                checked = fruits,
+                                onCheckedChange = { fruits = it },
+                                colors = CheckboxDefaults.colors(
+                                    checkedColor = Color(0xFF545454)
+                                )
                             )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Fruits")
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        //Vegetables
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(
+                                modifier = Modifier.size(20.dp),
+                                checked = vegetables,
+                                onCheckedChange = { vegetables = it },
+                                colors = CheckboxDefaults.colors(
+                                    checkedColor = Color(0xFF545454)
+                                )
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Vegetables")
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        //Grains
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(
+                                modifier = Modifier.size(20.dp),
+                                checked = grains,
+                                onCheckedChange = { grains = it },
+                                colors = CheckboxDefaults.colors(
+                                    checkedColor = Color(0xFF545454)
+                                )
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Grains")
+                        }
+                    }
+                    // Second Column: Red Meat, Seafood, Poultry
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        //Red Meat
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(
+                                modifier = Modifier.size(20.dp),
+                                checked = redMeat,
+                                onCheckedChange = { redMeat = it },
+                                colors = CheckboxDefaults.colors(
+                                    checkedColor = Color(0xFF545454)
+                                )
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Red Meat")
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        //Seafood
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(
+                                modifier = Modifier.size(20.dp),
+                                checked = seafood,
+                                onCheckedChange = { seafood = it },
+                                colors = CheckboxDefaults.colors(
+                                    checkedColor = Color(0xFF545454)
+                                )
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Seafood")
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        //Poultry
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(
+                                modifier = Modifier.size(20.dp),
+                                checked = poultry,
+                                onCheckedChange = { poultry = it },
+                                colors = CheckboxDefaults.colors(
+                                    checkedColor = Color(0xFF545454)
+                                )
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Poultry")
+                        }
+                    }
+                    // Third Column: Fish, Eggs, Nuts/Seeds
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        //Fish
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(
+                                modifier = Modifier.size(20.dp),
+                                checked = fish,
+                                onCheckedChange = { fish = it },
+                                colors = CheckboxDefaults.colors(
+                                    checkedColor = Color(0xFF545454)
+                                )
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Fish")
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        //Eggs
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(
+                                modifier = Modifier.size(20.dp),
+                                checked = eggs,
+                                onCheckedChange = { eggs = it },
+                                colors = CheckboxDefaults.colors(checkedColor = Color(0xFF545454))
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Eggs")
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        //Nutts and Seeds
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(
+                                modifier = Modifier.size(20.dp),
+                                checked = nutsSeeds,
+                                onCheckedChange = { nutsSeeds = it },
+                                colors = CheckboxDefaults.colors(
+                                    checkedColor = Color(0xFF545454)
+                                )
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Nuts/Seeds")
                         }
                     }
                 }
-
-            }
-            /**
-             *
-             * Timings Implementation
-             *
-             */
-            Spacer(modifier = Modifier.height(15.dp))
-            Text("Timings", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(10.dp))
-            //taken help from ChatGpt to help me position things well and use of .show()
-            Row {
+                if (Checkbox_Error){
+                    Text("Please select at leaset One", color = Color.Red)}
+                /**
+                 *
+                 * Persona Implementation
+                 *
+                 */
+                HorizontalDivider(thickness = 2.dp)// taken from : https://developer.android.com/develop/ui/compose/components/divider
+                Text("Your Persona", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    "People can be broadly classified into 6 different types based on their eating preferences. Click on each button below to find out the different types, and select the type that best fits you!",
+                    fontSize = 12.sp
+                )
+                Spacer(modifier = Modifier.height(10.dp))
                 Column(
-                    modifier = Modifier.weight(1f),
-                    horizontalAlignment = Alignment.Start){
-                    Text("What time of day approx. do you normally eat your biggest meal?",fontSize = 13.sp)
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    //Made use of Box for easy alignment
+                    //implementation of the Box https://www.youtube.com/watch?v=rw80qs6ErWQ + chatGpt
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Box() {
+                            Button(
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
+                                onClick = { showHealthyDialog = true },
+                                shape = RoundedCornerShape(8.dp),
+                                contentPadding = PaddingValues(10.dp)
+                            ) {
+                                Text("Health Devotee", fontSize = 11.sp, color = Color.Black)
+                            }
+                        }
+                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                            Button(
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
+                                onClick = { showMindfulDialog = true },
+                                shape = RoundedCornerShape(8.dp),
+                                contentPadding = PaddingValues(10.dp)
+                            ) {
+                                Text("Mindful Eater", fontSize = 11.sp, color = Color.Black)
+                            }
+                        }
+                        Box(
+                            modifier = Modifier.weight(1f),
+                            contentAlignment = Alignment.CenterEnd
+                        ) {
+                            Button(
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
+                                onClick = { showWellnessDialog = true },
+                                shape = RoundedCornerShape(8.dp),
+                                contentPadding = PaddingValues(10.dp)
+                            ) {
+                                Text("Welness Striver", fontSize = 11.sp, color = Color.Black)
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    // Second row
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Box() {
+                            Button(
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
+                                onClick = { showBalancedDialog = true },
+                                shape = RoundedCornerShape(8.dp),
+                                contentPadding = PaddingValues(10.dp)
+                            ) {
+                                Text("Balance Seeker", fontSize = 11.sp, color = Color.Black)
+                            }
+                        }
+                        Box(modifier = Modifier.weight(0.8f), contentAlignment = Alignment.Center) {
+                            Button(
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
+                                onClick = { showProcastinatorDialog = true },
+                                shape = RoundedCornerShape(9.dp),
+                                contentPadding = PaddingValues(10.dp)
+                            ) {
+                                Text("Health Procastinator", fontSize = 11.sp, color = Color.Black)
+                            }
+                        }
+                        Box(modifier = Modifier.weight(0.5f), contentAlignment = Alignment.Center) {
+                            Button(
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
+                                onClick = { showCarefreeDialog = true },
+                                shape = RoundedCornerShape(8.dp),
+                                contentPadding = PaddingValues(10.dp)
+                            ) {
+                                Text("Food Carefree", fontSize = 11.sp, color = Color.Black)
+                            }
+                        }
+                    }
                 }
+                /**
+                 *
+                 * Alert Dialog Implementation
+                 *
+                 * Code taken from Applied Class and Modified accordingly
+                 *
+                 */
+                // AlertDialog for Healthy Eater
+                if (showHealthyDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showHealthyDialog = false },
+                        title = { Text("Healthy Eater", fontWeight = FontWeight.Bold) },
+                        text = {
+                            Column(
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.persona_1),
+                                    contentDescription = "Balance Seeker",
+                                    contentScale = ContentScale.Fit,
+                                    modifier = Modifier
+                                        .height(160.dp)
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text("I’m passionate about healthy eating & health plays a big part in my life. I use social media to follow active lifestyle personalities or get new recipes/exercise ideas. I may even buy superfoods or follow a particular type of diet. I like to think I am super healthy.", textAlign = TextAlign.Center)
+                            }
+                        },
+                        confirmButton = {
+                            Button(onClick = { showHealthyDialog = false }) {
+                                Text("OK")
+                            }
+                        }
+                    )
+                }
+                // AlertDialog for Mindful Eater
+                if (showMindfulDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showMindfulDialog = false },
+                        title = { Text("Mindful Eater", fontWeight = FontWeight.Bold) },
+                        text = {
+                            Column(
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.persona_2),
+                                    contentDescription = "Balance Seeker",
+                                    contentScale = ContentScale.Fit,
+                                    modifier = Modifier
+                                        .height(160.dp)
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text("I’m health-conscious and being healthy and eating healthy is important to me. Although health means different things to different people, I make conscious lifestyle decisions about eating based on what I believe healthy means. I look for new recipes and healthy eating information on social media.", textAlign = TextAlign.Center)
+                            }
+                        },
+                        confirmButton = {
+                            Button(onClick = { showMindfulDialog = false }) {
+                                Text("OK")
+                            }
+                        }
+                    )
+                }
+                // AlertDialog for Wellness Striver
+                if (showWellnessDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showWellnessDialog = false },
+                        title = { Text("Welness Striver", fontWeight = FontWeight.Bold) },
+                        text = {
+                            Column(
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.persona_3),
+                                    contentDescription = "Balance Seeker",
+                                    contentScale = ContentScale.Fit,
+                                    modifier = Modifier
+                                        .height(160.dp)
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text("I aspire to be healthy (but struggle sometimes). Healthy eating is hard work! I’ve tried to improve my diet, but always find things that make it difficult to stick with the changes. Sometimes I notice recipe ideas or healthy eating hacks, and if it seems easy enough, I’ll give it a go.", textAlign = TextAlign.Center)
+                            }
+                        },
+                        confirmButton = {
+                            Button(onClick = { showWellnessDialog = false }) {
+                                Text("OK")
+                            }
+                        }
+                    )
+                }
+
+                // AlertDialog for Balance Seeker
+                if (showBalancedDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showBalancedDialog = false },
+                        title = { Text("Balance Seeker", fontWeight = FontWeight.Bold) },
+                        text = {
+                            Column(
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.persona_4),
+                                    contentDescription = "Balance Seeker",
+                                    contentScale = ContentScale.Fit,
+                                    modifier = Modifier
+                                        .height(160.dp)
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text("I try and live a balanced lifestyle, and I think that all foods are okay in moderation. I shouldn’t have to feel guilty about eating a piece of cake now and again. I get all sorts of inspiration from social media like finding out about new restaurants, fun recipes and sometimes healthy eating tips.", textAlign = TextAlign.Center)
+                            }
+                        },
+                        confirmButton = {
+                            Button(onClick = { showBalancedDialog = false }) {
+                                Text("OK")
+                            }
+                        }
+                    )
+                }
+                // AlertDialog for Health Procrastinator
+                if (showProcastinatorDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showProcastinatorDialog = false },
+                        title = { Text("Health Procastinator", fontWeight = FontWeight.Bold) },
+                        text = {
+                            Column(
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.persona_5),
+                                    contentDescription = "Balance Seeker",
+                                    contentScale = ContentScale.Fit,
+                                    modifier = Modifier
+                                        .height(160.dp)
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text("I’m contemplating healthy eating but it’s not a priority for me right now. I know the basics about what it means to be healthy, but it doesn’t seem relevant to me right now. I have taken a few steps to be healthier but I am not motivated to make it a high priority because I have too many other things going on in my life.", textAlign = TextAlign.Center)
+                            }
+                        },
+                        confirmButton = {
+                            Button(onClick = { showProcastinatorDialog = false }) {
+                                Text("OK")
+                            }
+                        }
+                    )
+                }
+                // AlertDialog for Food Carefree
+                if (showCarefreeDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showCarefreeDialog = false },
+                        title = { Text("Food Carefree", fontWeight = FontWeight.Bold) },
+                        text = {
+                            Column(
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.persona_6),
+                                    contentDescription = "Balance Seeker",
+                                    contentScale = ContentScale.Fit,
+                                    modifier = Modifier
+                                        .height(160.dp)
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text("I’m not bothered about healthy eating. I don’t really see the point and I don’t think about it. I don’t really notice healthy eating tips or recipes and I don’t care what I eat.", textAlign = TextAlign.Center)
+                            }
+                        },
+                        confirmButton = {
+                            Button(onClick = { showCarefreeDialog = false }) {
+                                Text("OK")
+                            }
+                        }
+                    )
+                }
+                Spacer(modifier = Modifier.padding(3.dp))
+                HorizontalDivider(thickness = 2.dp)// taken from https://developer.android.com/develop/ui/compose/components/divider
+                Spacer(modifier = Modifier.padding(3.dp))
+                Text(
+                    "Which persona suits you the best?",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
                 Column(
                     modifier = Modifier
-                        .weight(1f),
-                    horizontalAlignment = Alignment.End){
-                    Button(
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
-                        shape = RoundedCornerShape(8.dp),
-                        onClick = { timePickerFun(context,mTime = biggestMealTime).show() }
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.DateRange,
-                                contentDescription = "Calendar Icon",
-                                tint = Color(0xFF137A44))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                if (biggestMealTime.value.isEmpty()){
-                                    "00:00"
-                                }
-                                else{
-                                biggestMealTime.value
-                                },color = Color.Black)
-                        }
-                    }
-
-                }
-            }
-            Row {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    horizontalAlignment = Alignment.CenterHorizontally){
-                    Text("What time of day approx. do you normally eat your biggest meal?", fontSize = 13.sp)
-                }
-                Column(
-                    modifier = Modifier.weight(0.7f),
-                    horizontalAlignment = Alignment.End){
-                    Button(
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
-                        shape = RoundedCornerShape(8.dp),
-                        onClick = { timePickerFun(context,mTime = SleepTime).show() }
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.DateRange,
-                                contentDescription = "Calendar Icon",
-                                tint = Color(0xFF137A44))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(if (SleepTime.value.isEmpty()){
-                                "00:00"
-                            }
-                            else{
-                                SleepTime.value
-                            },color = Color.Black)
-                        }
-                    }
-
-                }
-
-
-
-
-            }
-            Row {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    horizontalAlignment = Alignment.Start){
-                    Text("What time of day approx. do you normally eat your biggest meal?", fontSize = 13.sp)
-                }
-                Column(
-                    modifier = Modifier.weight(1f),
-                    horizontalAlignment = Alignment.End){
-                    Button(
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
-                        shape = RoundedCornerShape(8.dp),
-                        onClick = { timePickerFun(context,mTime = WakeTime).show() }
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.DateRange,
-                                contentDescription = "Calendar Icon",
-                                tint = Color(0xFF137A44))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(if (WakeTime.value.isEmpty()){
-                                "00:00"
-                            }
-                            else{
-                                WakeTime.value
-                            },color = Color.Black)
-                        }
-                    }
-                }
-            }
-
-            Button(
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF137A44)),
-                shape = RoundedCornerShape(10.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                onClick = { saveDialog = true}
-
-            ){Text("Review And Continue",fontSize = 16.sp, fontWeight = FontWeight.Bold)
-
-            }
-            //Creating a dialog box for confirmation of the information entered
-            if (saveDialog) {
-                AlertDialog(
-                    onDismissRequest = { saveDialog = false },
-                    title = { Text("Below Is The Information You Entered", fontWeight = FontWeight.Bold) },
-                    text = {
-                        Column{
-                            Text("Categories You Can Eat",fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                            if(fruits){
-                                Text("Fruits")
-                            }
-                            if(vegetables){
-                                Text("Vegetables")
-                            }
-                            if(grains){
-                                Text("Grains")
-                            }
-                            if(redMeat){
-                                Text("Red Meat")
-                            }
-                            if(seafood){
-                                Text("Seafood")
-                            }
-                            if(poultry) {
-                                Text("Poultry")
-                            }
-                            if(fish){
-                                Text("Fish")
-                            }
-                            if(eggs){
-                                Text("Eggs")
-                            }
-                            if(nutsSeeds){
-                                Text("Nuts/Seeds")
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text("Persona You Selected",fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                        .fillMaxWidth()
+                        .border( //discovered this function on the Android Documentation
+                            width = 1.dp,
+                            color = Color.Gray,
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                ) {
+                    var expanded by remember { mutableStateOf(false) }
+                    val personas = listOf(
+                        "Healthy Devotee",
+                        "Mindful Eater",
+                        "Wellness Striver",
+                        "Balanced Seeker",
+                        "Health Procrastinator",
+                        "Food Carefree"
+                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {//Code for DropDown menu taken from applied and Modified accordingly
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { expanded = true }
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Text(selectedPersona)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text("Timings You Selected",fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text("Biggest Meal Time: ${biggestMealTime.value}")
-                            Text("Sleep Time: ${SleepTime.value}")
-                            Text("Wake Time: ${WakeTime.value}")
-                        }},
-
-                    /**
-                     *
-                     *When button is pressed the data gets saved into the shred preference of that particular logged in user
-                     * and the user is directed towards the Home screen
-                     *
-                     */
-                    confirmButton = {
-                        Button(
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF137A44)),
-                            onClick = {
-                                val sharedPrefs = context.getSharedPreferences(
-                                    "my_prefs_$userId",
-                                    android.content.Context.MODE_PRIVATE
+                            Icon(Icons.Default.ArrowDropDown, contentDescription = "Dropdown")
+                        }
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            personas.forEach { persona ->
+                                DropdownMenuItem(
+                                    text = { Text(persona) },
+                                    onClick = {
+                                        selectedPersona = persona
+                                        expanded = false
+                                    }
                                 )
-                                with(sharedPrefs.edit()) {
-                                    putBoolean("fruits", fruits)
-                                    putBoolean("vegetables", vegetables)
-                                    putBoolean("grains", grains)
-                                    putBoolean("red_meat", redMeat)
-                                    putBoolean("seafood", seafood)
-                                    putBoolean("poultry", poultry)
-                                    putBoolean("fish", fish)
-                                    putBoolean("eggs", eggs)
-                                    putBoolean("nuts_seeds", nutsSeeds)
-                                    putString("selected_persona", selectedPersona)
-                                    putString("biggest_meal_time", biggestMealTime.value)
-                                    putString("sleep_time", SleepTime.value)
-                                    putString("wake_time", WakeTime.value)
-                                    apply()
+                            }
+                        }
+                    }
+                }
+                if (Persona_Error){
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text("Please select a Persona", color = Color.Red)}
+                /**
+                 *
+                 * Timings Implementation
+                 *
+                 */
+                Spacer(modifier = Modifier.height(15.dp))
+                Text("Timings", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(10.dp))
+                //taken help from ChatGpt to help me position things well and use of .show()
+                Row {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        Text("What time of day approx. do you normally eat your biggest meal?", fontSize = 13.sp)
+                    }
+                    Column(
+                        modifier = Modifier
+                            .weight(1f),
+                        horizontalAlignment = Alignment.End
+                    ) {
+                        Button(
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
+                            shape = RoundedCornerShape(8.dp),
+                            onClick = { timePickerFun(context, mTime = biggestMealTime).show() }
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.DateRange,
+                                    contentDescription = "Calendar Icon",
+                                    tint = Color(0xFF137A44)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    if (biggestMealTime.value.isEmpty()) {
+                                        "00:00"
+                                    } else {
+                                        biggestMealTime.value
+                                    }, color = Color.Black
+                                )
+                            }
+                        }
+                    }
+                }
+                Row {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text("What time of day approx. do you normally eat your biggest meal?", fontSize = 13.sp)
+                    }
+                    Column(
+                        modifier = Modifier.weight(0.7f),
+                        horizontalAlignment = Alignment.End
+                    ) {
+                        Button(
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
+                            shape = RoundedCornerShape(8.dp),
+                            onClick = { timePickerFun(context, mTime = SleepTime).show() }
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.DateRange,
+                                    contentDescription = "Calendar Icon",
+                                    tint = Color(0xFF137A44)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    if (SleepTime.value.isEmpty()) {
+                                        "00:00"
+                                    } else {
+                                        SleepTime.value
+                                    }, color = Color.Black
+                                )
+                            }
+                        }
+                    }
+                }
+                Row {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        Text("What time of day approx. do you normally eat your biggest meal?", fontSize = 13.sp)
+                    }
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.End
+                    ) {
+                        Button(
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
+                            shape = RoundedCornerShape(8.dp),
+                            onClick = { timePickerFun(context, mTime = WakeTime).show() }
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.DateRange,
+                                    contentDescription = "Calendar Icon",
+                                    tint = Color(0xFF137A44)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    if (WakeTime.value.isEmpty()) {
+                                        "00:00"
+                                    } else {
+                                        WakeTime.value
+                                    }, color = Color.Black
+                                )
+                            }
+                        }
+                    }
+                }
+                Button(
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF137A44)),
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    onClick = { saveDialog = true }
+                ) {
+                    Text("Review And Continue", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
+                //Creating a dialog box for confirmation of the information entered
+                if (saveDialog) {
+                    AlertDialog(
+                        onDismissRequest = { saveDialog = false },
+                        title = { Text("Below Is The Information You Entered", fontWeight = FontWeight.Bold) },
+                        text = {
+                            Column {
+                                Text("Categories You Can Eat", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                                if (fruits) {
+                                    Text("Fruits")
                                 }
-                                // Dismiss the dialog
-                                saveDialog = false
-                                // VALIDATION THAT THE USER HAS FILLED ALL THE REQUIRED FIELDS
-                                if ((fruits || vegetables || grains || redMeat || seafood || poultry || fish || eggs || nutsSeeds) && selectedPersona.isNotEmpty() && biggestMealTime.value.isNotEmpty() && SleepTime.value.isNotEmpty() && WakeTime.value.isNotEmpty()) {
+                                if (vegetables) {
+                                    Text("Vegetables")
+                                }
+                                if (grains) {
+                                    Text("Grains")
+                                }
+                                if (redMeat) {
+                                    Text("Red Meat")
+                                }
+                                if (seafood) {
+                                    Text("Seafood")
+                                }
+                                if (poultry) {
+                                    Text("Poultry")
+                                }
+                                if (fish) {
+                                    Text("Fish")
+                                }
+                                if (eggs) {
+                                    Text("Eggs")
+                                }
+                                if (nutsSeeds) {
+                                    Text("Nuts/Seeds")
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text("Persona You Selected", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                                Text(selectedPersona)
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text("Timings You Selected", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text("Biggest Meal Time: ${biggestMealTime.value}")
+                                Text("Sleep Time: ${SleepTime.value}")
+                                Text("Wake Time: ${WakeTime.value}")
+                            }
+                        },
+                        /**
+                         *
+                         *When button is pressed the data gets saved into the shred preference of that particular logged in user
+                         * and the user is directed towards the Home screen
+                         *
+                         */
+                        confirmButton = {
+                            Button(
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF137A44)),
+                                onClick = {
                                     val sharedPrefs = context.getSharedPreferences(
                                         "my_prefs_$userId",
                                         android.content.Context.MODE_PRIVATE
                                     )
-                                    with(sharedPrefs.edit()){
-                                    putBoolean("Redirect", true)}
-                                    context.startActivity(Intent(context, Dashboard::class.java))
-                                }
-                                if (!(fruits || vegetables || grains || redMeat || seafood || poultry || fish || eggs || nutsSeeds)){
-                                    Toast.makeText(context, "Please Fill the given Categories", Toast.LENGTH_LONG).show()
-                                }
-                                else if (!(selectedPersona.isNotEmpty())){
-                                    Toast.makeText(context, "Please Fill the given Categories", Toast.LENGTH_LONG).show()
-                                }
-                                else if (!(biggestMealTime.value.isNotEmpty())){
-                                    Toast.makeText(context, "Please Fill the given Categories", Toast.LENGTH_LONG).show()
+                                    with(sharedPrefs.edit()) {
+                                        putBoolean("fruits", fruits)
+                                        putBoolean("vegetables", vegetables)
+                                        putBoolean("grains", grains)
+                                        putBoolean("red_meat", redMeat)
+                                        putBoolean("seafood", seafood)
+                                        putBoolean("poultry", poultry)
+                                        putBoolean("fish", fish)
+                                        putBoolean("eggs", eggs)
+                                        putBoolean("nuts_seeds", nutsSeeds)
+                                        putString("selected_persona", selectedPersona)
+                                        putString("biggest_meal_time", biggestMealTime.value)
+                                        putString("sleep_time", SleepTime.value)
+                                        putString("wake_time", WakeTime.value)
+                                        apply()
+                                    }
+                                    // Dismiss the dialog
+                                    saveDialog = false
+                                    // VALIDATION THAT THE USER HAS FILLED ALL THE REQUIRED FIELDS
+                                    if ((fruits || vegetables || grains || redMeat || seafood || poultry || fish || eggs || nutsSeeds) && selectedPersona.isNotEmpty() && biggestMealTime.value.isNotEmpty() && SleepTime.value.isNotEmpty() && WakeTime.value.isNotEmpty()) {
+                                        val sharedPrefs = context.getSharedPreferences(
+                                            "my_prefs_$userId",
+                                            android.content.Context.MODE_PRIVATE
+                                        )
+                                        with(sharedPrefs.edit()){
+                                            putBoolean("Redirect", true)
+                                        }
+                                        context.startActivity(Intent(context, Dashboard::class.java))
+                                    }
+                                    if (!(fruits || vegetables || grains || redMeat || seafood || poultry || fish || eggs || nutsSeeds)){
+                                        Checkbox_Error=true
+                                        Toast.makeText(context, "Please Fill the given Categories", Toast.LENGTH_LONG).show()
+                                    }
+                                    else if (!(selectedPersona.isNotEmpty())){
+                                        Persona_Error=true
+                                        println(selectedPersona)
+                                        Toast.makeText(context, "Please Fill the given Categories", Toast.LENGTH_LONG).show()
+                                    }
+                                    else if (!(biggestMealTime.value.isNotEmpty())){
+                                        Toast.makeText(context, "Please Fill the given Categories", Toast.LENGTH_LONG).show()
 
+                                    }
+                                    else if (!(SleepTime.value.isNotEmpty())) {
+                                        Toast.makeText(
+                                            context,
+                                            "Please Fill the given Categories",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
+                                    else if (!(WakeTime.value.isNotEmpty())) {
+                                        Toast.makeText(
+                                            context,
+                                            "Please Fill the given Categories",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
                                 }
-                                else if (!(SleepTime.value.isNotEmpty())) {
-                                    Toast.makeText(
-                                        context,
-                                        "Please Fill the given Categories",
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                }
-                                else if (!(WakeTime.value.isNotEmpty())) {
-                                    Toast.makeText(
-                                        context,
-                                        "Please Fill the given Categories",
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                }
-
-                            })
-
-                                {
-                            Text("Save") }
-                    }
-                )
+                            ) {
+                                Text("Save")
+                            }
+                        }
+                    )
+                }
             }
         }
-    }}
-
-
-
+    }
+}
