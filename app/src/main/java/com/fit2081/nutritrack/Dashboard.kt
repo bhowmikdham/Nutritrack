@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -268,6 +269,7 @@ fun getNutrientScore(context: Context, userId: String, nutrient: String): String
                     "sugar" -> if (sex == "male") tokens[54].trim() else tokens[55].trim()
                     "saturated fats" -> if (sex == "male") tokens[57].trim() else tokens[58].trim()
                     "unsaturated fats" -> if (sex == "male") tokens[60].trim() else tokens[61].trim()
+                    "discretionary foods" -> if (sex == "male") tokens[5].trim() else tokens[6].trim()
                     else -> ""
                 }
             }
@@ -295,7 +297,8 @@ fun Insights(navController: NavHostController) {
         "water",
         "sugar",
         "saturated fats",
-        "unsaturated fats"
+        "unsaturated fats",
+        "discretionary foods"
     )
 
     // Colors for progress bars
@@ -331,7 +334,7 @@ fun Insights(navController: NavHostController) {
                 println("rawscore: $rawScore")
                 // Convert to a scale out of 10 for display (if desired)
                 val (displayScore, fraction) = if (nutrient.lowercase() == "water" || nutrient.lowercase() == "alcohol") {
-                    val ds = rawScore / 2f       // Now ds is 0-5
+                    val ds = rawScore    // Now ds is 0-5
                     ds to (ds / 5f)              // fraction = ds divided by 5 (0f..1f)
                 } else {
                     rawScore to (rawScore / 10f)  // fraction = rawScore/10 (0f..1f)
@@ -364,7 +367,7 @@ fun Insights(navController: NavHostController) {
                         )}
                     Box(modifier = Modifier.width(50.dp),contentAlignment = Alignment.CenterStart) {
                         Text(
-                            text = if (nutrient.lowercase() == "water" || nutrient.lowercase() == "alcohol")
+                            text = if (nutrient.lowercase() == "water" || nutrient.lowercase() == "alcohol" ||nutrient.lowercase() == "unsaturated fats" ||nutrient.lowercase() == "saturated fats")
                                 "$displayScore/5"
                             else
                                 "$displayScore/10",
@@ -425,8 +428,11 @@ fun Insights(navController: NavHostController) {
 
                 }
             ){
+                Row {
+                    Icon(Icons.Filled.Share, contentDescription = "Share", tint = Color.Black)
+                    Spacer(modifier = Modifier.width(2.dp))
                 Text("Share With Someone", fontSize = 15.sp, color = Color.Black)
-            }
+            }}
             Button(
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
                 shape = RoundedCornerShape(12.dp),
@@ -473,6 +479,7 @@ fun MyNavHost(innerpadding: PaddingValues, navController: NavHostController) {
 }
 
 @Composable
+//the following code base is taken from the Week 4 Lecture/Applied and Modified to Align accordingly to the Requirements
 fun BottomMenu(navController: NavHostController) {
     var selected_item by remember { mutableStateOf(0) }
     val items = listOf("Home", "Insights", "Nutricoach", "Settings")
