@@ -100,6 +100,9 @@ fun FoodIntakeQuestionnaire() {
     val context = LocalContext.current
     var Checkbox_Error by remember { mutableStateOf(false) }
     var Persona_Error by remember { mutableStateOf(false) }
+    var biggestMealTime_Error by remember { mutableStateOf(false) }
+    var SleepTime_Error by remember { mutableStateOf(false) }
+    var WakeTime_Error by remember { mutableStateOf(false) }
 
     /**
      *
@@ -721,6 +724,9 @@ fun FoodIntakeQuestionnaire() {
                         }
                     }
                 }
+                if (biggestMealTime_Error){
+                    Text("Please select your biggest meal time", color = Color.Red, fontSize = 12.sp)
+                }
                 Row {
                     Column(
                         modifier = Modifier.weight(1f),
@@ -754,6 +760,9 @@ fun FoodIntakeQuestionnaire() {
                             }
                         }
                     }
+                }
+                if (SleepTime_Error){
+                    Text("Please select your sleep time", color = Color.Red, fontSize = 12.sp)
                 }
                 Row {
                     Column(
@@ -789,13 +798,48 @@ fun FoodIntakeQuestionnaire() {
                         }
                     }
                 }
+                if (WakeTime_Error){
+                    Text("Please select your wake time", color = Color.Red, fontSize = 12.sp)
+                }
                 Button(
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF137A44)),
                     shape = RoundedCornerShape(10.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
-                    onClick = { saveDialog = true }
+                    onClick = {
+                        // Reset error states
+                        Checkbox_Error = false
+                        Persona_Error = false
+                        biggestMealTime_Error = false
+                        SleepTime_Error = false
+                        WakeTime_Error = false
+
+                        // Independent validation checks:
+                        if (!(fruits || vegetables || grains || redMeat || seafood || poultry || fish || eggs || nutsSeeds)) {
+                            Checkbox_Error = true
+                        }
+                        if (selectedPersona.isEmpty()) {
+                            Persona_Error = true
+                        }
+                        if (biggestMealTime.value.isEmpty()) {
+                            biggestMealTime_Error = true
+                        }
+                        if (SleepTime.value.isEmpty()) {
+                            SleepTime_Error = true
+                        }
+                        if (WakeTime.value.isEmpty()) {
+                            WakeTime_Error = true
+                        }
+
+                        // Final check: if any error flag is set, show a Toast; otherwise, proceed
+                        if (Checkbox_Error || Persona_Error || biggestMealTime_Error || SleepTime_Error || WakeTime_Error) {
+                            Toast.makeText(context, "Please fill in all missing fields", Toast.LENGTH_LONG).show()
+                        } else {
+                            saveDialog = true
+                        }
+
+                    }
                 ) {
                     Text("Review And Continue", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }
@@ -855,71 +899,36 @@ fun FoodIntakeQuestionnaire() {
                             Button(
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF137A44)),
                                 onClick = {
-                                    val sharedPrefs = context.getSharedPreferences(
-                                        "my_prefs_$userId",
-                                        android.content.Context.MODE_PRIVATE
-                                    )
-                                    with(sharedPrefs.edit()) {
-                                        putBoolean("fruits", fruits)
-                                        putBoolean("vegetables", vegetables)
-                                        putBoolean("grains", grains)
-                                        putBoolean("red_meat", redMeat)
-                                        putBoolean("seafood", seafood)
-                                        putBoolean("poultry", poultry)
-                                        putBoolean("fish", fish)
-                                        putBoolean("eggs", eggs)
-                                        putBoolean("nuts_seeds", nutsSeeds)
-                                        putString("selected_persona", selectedPersona)
-                                        putString("biggest_meal_time", biggestMealTime.value)
-                                        putString("sleep_time", SleepTime.value)
-                                        putString("wake_time", WakeTime.value)
-                                        apply()
-                                    }
-                                    // Dismiss the dialog
-                                    saveDialog = false
-                                    // VALIDATION THAT THE USER HAS FILLED ALL THE REQUIRED FIELDS
-                                    if ((fruits || vegetables || grains || redMeat || seafood || poultry || fish || eggs || nutsSeeds) && selectedPersona.isNotEmpty() && biggestMealTime.value.isNotEmpty() && SleepTime.value.isNotEmpty() && WakeTime.value.isNotEmpty()) {
                                         val sharedPrefs = context.getSharedPreferences(
                                             "my_prefs_$userId",
                                             android.content.Context.MODE_PRIVATE
                                         )
-                                        with(sharedPrefs.edit()){
+                                        with(sharedPrefs.edit()) {
+                                            putBoolean("fruits", fruits)
+                                            putBoolean("vegetables", vegetables)
+                                            putBoolean("grains", grains)
+                                            putBoolean("red_meat", redMeat)
+                                            putBoolean("seafood", seafood)
+                                            putBoolean("poultry", poultry)
+                                            putBoolean("fish", fish)
+                                            putBoolean("eggs", eggs)
+                                            putBoolean("nuts_seeds", nutsSeeds)
+                                            putString("selected_persona", selectedPersona)
+                                            putString("biggest_meal_time", biggestMealTime.value)
+                                            putString("sleep_time", SleepTime.value)
+                                            putString("wake_time", WakeTime.value)
                                             putBoolean("Redirect", true)
-                                        }
+                                            apply()}
+                                        saveDialog = false
                                         context.startActivity(Intent(context, Dashboard::class.java))
-                                    }
-                                    if (!(fruits || vegetables || grains || redMeat || seafood || poultry || fish || eggs || nutsSeeds)){
-                                        Checkbox_Error=true
-                                        Toast.makeText(context, "Please Fill the given Categories", Toast.LENGTH_LONG).show()
-                                    }
-                                    else if (!(selectedPersona.isNotEmpty())){
-                                        Persona_Error=true
-                                        println(selectedPersona)
-                                        Toast.makeText(context, "Please Fill the given Categories", Toast.LENGTH_LONG).show()
-                                    }
-                                    else if (!(biggestMealTime.value.isNotEmpty())){
-                                        Toast.makeText(context, "Please Fill the given Categories", Toast.LENGTH_LONG).show()
+                                        Toast.makeText(context, "Please fill in all missing fields", Toast.LENGTH_LONG).show()
 
-                                    }
-                                    else if (!(SleepTime.value.isNotEmpty())) {
-                                        Toast.makeText(
-                                            context,
-                                            "Please Fill the given Categories",
-                                            Toast.LENGTH_LONG
-                                        ).show()
-                                    }
-                                    else if (!(WakeTime.value.isNotEmpty())) {
-                                        Toast.makeText(
-                                            context,
-                                            "Please Fill the given Categories",
-                                            Toast.LENGTH_LONG
-                                        ).show()
-                                    }
                                 }
                             ) {
                                 Text("Save")
                             }
                         }
+
                     )
                 }
             }
