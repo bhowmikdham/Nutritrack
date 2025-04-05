@@ -9,7 +9,6 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -29,16 +28,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.fit2081.nutritrack.ui.theme.NutritrackTheme
-import kotlin.math.floor
 class Dashboard : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,7 +56,7 @@ class Dashboard : ComponentActivity() {
         }
     }
 }
-
+//function to  fetch out the HIEFAScore of the user
 fun getUserHIEFAScore(context: Context, userId: String): String? {
     try {
         context.assets.open("accounts.csv").bufferedReader().useLines { lines ->
@@ -71,14 +67,14 @@ fun getUserHIEFAScore(context: Context, userId: String): String? {
                     isFirstLine = false
                     return@forEach
                 }
-                val tokens = line.split(",")
-                val csvUserId = tokens[1].trim()
+                val csv_value = line.split(",")
+                val csvUserId = csv_value[1].trim()
                     if (csvUserId == userId) {
-                        val sex = tokens[2].trim()
+                        val sex = csv_value[2].trim()
                         return if (sex == "Male") {
-                            tokens[3].trim() // Male_HIEFA_Score
+                            csv_value[3].trim() // Male_HIEFA_Score
                         } else if (sex == "Female") {
-                            tokens[4].trim() // Female_HIEFA_Score
+                            csv_value[4].trim() // Female_HIEFA_Score
                         } else {
                             null
                         }
@@ -91,43 +87,6 @@ fun getUserHIEFAScore(context: Context, userId: String): String? {
     return null
 }
 
-fun getCurrentUserNutrientScore(context: Context, nutrient: String): String {
-    // Retrieve the logged-in user's ID from SharedPreferences
-    val sharedPrefs = context.getSharedPreferences("my_prefs", Context.MODE_PRIVATE)
-    val userId = sharedPrefs.getString("user_id", "") ?: ""
-
-    // Open the CSV file from assets and read line by line
-    context.assets.open("accounts.csv").bufferedReader().useLines { lines ->
-        var isHeader = true
-        lines.forEach { line ->
-            if (isHeader) {
-                isHeader = false  // Skip the header row
-                return@forEach
-            }
-            val tokens = line.split(",")
-            // Check if this row belongs to the current user (User_ID is at index 1)
-            if (tokens[1].trim() == userId) {
-                val sex = tokens[2].trim().lowercase() // expecting "male" or "female"
-                return when (nutrient.lowercase()) {
-                    "vegetables" -> if (sex == "male") tokens[8].trim() else tokens[9].trim()
-                    "fruit" -> if (sex == "male") tokens[19].trim() else tokens[20].trim()
-                    "grains and cereals" -> if (sex == "male") tokens[29].trim() else tokens[30].trim()
-                    "whole grains" -> if (sex == "male") tokens[33].trim() else tokens[34].trim()
-                    "meat and alternatives" -> if (sex == "male") tokens[36].trim() else tokens[37].trim()
-                    "dairy and alternatives" -> if (sex == "male") tokens[40].trim() else tokens[41].trim()
-                    "sodium" -> if (sex == "male") tokens[43].trim() else tokens[44].trim()
-                    "alcohol" -> if (sex == "male") tokens[46].trim() else tokens[47].trim()
-                    "water" -> if (sex == "male") tokens[49].trim() else tokens[50].trim()
-                    "sugar" -> if (sex == "male") tokens[54].trim() else tokens[55].trim()
-                    "saturated fats" -> if (sex == "male") tokens[57].trim() else tokens[58].trim()
-                    "unsaturated fats" -> if (sex == "male") tokens[60].trim() else tokens[61].trim()
-                    else -> ""
-                }
-            }
-        }
-    }
-    return ""
-}
 @Composable
 fun HomePage() {
     val context = LocalContext.current
@@ -135,7 +94,7 @@ fun HomePage() {
     val user = sharedPrefs.getString("user_id", "")
     val userHIEFAScore = getUserHIEFAScore(context, user.toString())?.toDoubleOrNull() ?: 0.0
     val scoreint = userHIEFAScore.toInt()
-    // making up a value which stores the cuurent picture of the arrow to show
+    // making up a value which stores the cuurent picture of the arrow to show depending on the values of the score
     val arrow = if (scoreint>= 80) {
         R.drawable.greenarrow
     }
@@ -219,6 +178,11 @@ fun HomePage() {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center)
                 {
+                    /**
+                     *
+                     * we change the colour of the score depending on the range defined
+                     *
+                     */
                     val color = if (scoreint >= 80) {
                         Color.Green
                     } else if (scoreint in 50 until 70) {
@@ -242,34 +206,35 @@ fun HomePage() {
 }
 
 @Composable
-// Helper function that reads the CSV file and returns the nutrient score
+// Helper function that reads the CSV file and returns the nutrient score\
+// Help was taken from Chatgpt to draft the following function
 fun getNutrientScore(context: Context, userId: String, nutrient: String): String {
     context.assets.open("accounts.csv").bufferedReader().useLines { lines ->
         var isHeader = true
         lines.forEach { line ->
             if (isHeader) {
-                // Skip the header row
+                // Skipping the header row
                 isHeader = false
                 return@forEach
             }
-            val tokens = line.split(",")
+            val csv_value = line.split(",")
             // Check for matching user (User_ID is at index 1)
-            if (tokens[1].trim() == userId) {
-                val sex = tokens[2].trim().lowercase() // "male" or "female"
+            if (csv_value[1].trim() == userId) {
+                val sex = csv_value[2].trim().lowercase()//  handles exception if data is not normalised to letters being typed in different case 
                 return when (nutrient.lowercase()) {
-                    "vegetables" -> if (sex == "male") tokens[8].trim() else tokens[9].trim()
-                    "fruit" -> if (sex == "male") tokens[19].trim() else tokens[20].trim()
-                    "grains and cereals" -> if (sex == "male") tokens[29].trim() else tokens[30].trim()
-                    "whole grains" -> if (sex == "male") tokens[33].trim() else tokens[34].trim()
-                    "meat and alternatives" -> if (sex == "male") tokens[36].trim() else tokens[37].trim()
-                    "dairy and alternatives" -> if (sex == "male") tokens[40].trim() else tokens[41].trim()
-                    "sodium" -> if (sex == "male") tokens[43].trim() else tokens[44].trim()
-                    "alcohol" -> if (sex == "male") tokens[46].trim() else tokens[47].trim()
-                    "water" -> if (sex == "male") tokens[49].trim() else tokens[50].trim()
-                    "sugar" -> if (sex == "male") tokens[54].trim() else tokens[55].trim()
-                    "saturated fats" -> if (sex == "male") tokens[57].trim() else tokens[58].trim()
-                    "unsaturated fats" -> if (sex == "male") tokens[60].trim() else tokens[61].trim()
-                    "discretionary foods" -> if (sex == "male") tokens[5].trim() else tokens[6].trim()
+                    "vegetables" -> if (sex == "male") csv_value[8].trim() else csv_value[9].trim()
+                    "fruit" -> if (sex == "male") csv_value[19].trim() else csv_value[20].trim()
+                    "grains and cereals" -> if (sex == "male") csv_value[29].trim() else csv_value[30].trim()
+                    "whole grains" -> if (sex == "male") csv_value[33].trim() else csv_value[34].trim()
+                    "meat and alternatives" -> if (sex == "male") csv_value[36].trim() else csv_value[37].trim()
+                    "dairy and alternatives" -> if (sex == "male") csv_value[40].trim() else csv_value[41].trim()
+                    "sodium" -> if (sex == "male") csv_value[43].trim() else csv_value[44].trim()
+                    "alcohol" -> if (sex == "male") csv_value[46].trim() else csv_value[47].trim()
+                    "water" -> if (sex == "male") csv_value[49].trim() else csv_value[50].trim()
+                    "sugar" -> if (sex == "male") csv_value[54].trim() else csv_value[55].trim()
+                    "saturated fats" -> if (sex == "male") csv_value[57].trim() else csv_value[58].trim()
+                    "unsaturated fats" -> if (sex == "male") csv_value[60].trim() else csv_value[61].trim()
+                    "discretionary foods" -> if (sex == "male") csv_value[5].trim() else csv_value[6].trim()
                     else -> ""
                 }
             }
@@ -284,7 +249,7 @@ fun Insights(navController: NavHostController) {
     val sharedPrefs = context.getSharedPreferences("my_prefs", Context.MODE_PRIVATE)
     val userId = sharedPrefs.getString("user_id", "") ?: ""
 
-    // List of nutrients to display; names must match your CSV mapping
+    // List of nutrients to display
     val nutrientList = listOf(
         "vegetables",
         "fruit",
@@ -301,7 +266,7 @@ fun Insights(navController: NavHostController) {
         "discretionary foods"
     )
 
-    // Colors for progress bars
+    // Following are the colors definded for the progress bars
     val progressColor = Color(0xFF137A44)
     val trackColor = Color(0xFFD7E6D6)
 
@@ -324,28 +289,32 @@ fun Insights(navController: NavHostController) {
         ) {
             Text("Your Nutrient Scores",fontWeight = FontWeight.Bold, fontSize = 30.sp)
             Spacer(modifier = Modifier.height(16.dp))
-
+            /**
+             *
+             * help taken from chatGpt for debugging purposes
+             * help taken from chat Gpt for scaling values purposes
+             * LinearProgress bar code taken from lecture and applieds and modified accordingly
+             */
             nutrientList.forEach { nutrient ->
-                // Fetch the nutrient score from CSV (should be 0..100)
                 val scoreStr = getNutrientScore(context, userId, nutrient)
-                // Debug: print the fetched score
-                println("Nutrient: $nutrient, scoreStr: $scoreStr")
+                // Debug: printing the fetched score
+                //println("Nutrient: $nutrient, userID, scoreStr: $scoreStr")
                 val rawScore = scoreStr.toFloatOrNull() ?: 0f
-                println("rawscore: $rawScore")
-                // Convert to a scale out of 10 for display (if desired)
+                //println("rawscore: $rawScore")
                 val (displayScore, fraction) = if (nutrient.lowercase() == "water" || nutrient.lowercase() == "alcohol") {
-                    val ds = rawScore    // Now ds is 0-5
-                    ds to (ds / 5f)              // fraction = ds divided by 5 (0f..1f)
+                    val ds = rawScore
+                    ds to (ds / 5f)   // by doing this we are dividing the rawscore for water and alcogol by 5f
                 } else {
                     rawScore to (rawScore / 10f)  // fraction = rawScore/10 (0f..1f)
                 }
 
-                // Display nutrient label on left and score on right
+                // Displaying nutrient label on left and score on right
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
-                ) {//got this idea from chat GPT for the first character to be upper code
+                ) {
+                    //got this idea from chat GPT for the first character to be upper code
                     Text(
                         text = nutrient.replaceFirstChar { it.uppercaseChar() },
                         style = MaterialTheme.typography.bodyLarge,
@@ -377,12 +346,14 @@ fun Insights(navController: NavHostController) {
                         )
                     }
                 }
-                // Display the progress bar with the fraction (note: pass the value directly)
-
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
-            // Total Food Quality Score section
+            /**
+             * 
+             * Displaying Total Food Score
+             * 
+             */
             Spacer(modifier = Modifier.height(16.dp))
             val totalScoreStr = getUserHIEFAScore(context, userId)
             val totalScore = totalScoreStr?.toFloatOrNull() ?: 0f
@@ -411,19 +382,15 @@ fun Insights(navController: NavHostController) {
              *
              */
             var shareText by remember { mutableStateOf("") }
-
+            //Navigation Code Taken from Applieds and Lectures and modified accordingly also made use of the Andorid Developer Documentation
             Button(
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
                 shape = RoundedCornerShape(12.dp),
                 onClick = {
                     shareText = "Hey my Total Food Quality Score is ${totalScore.toString()}"
-                    //create a intent to share the text
                     val shareIntent = Intent(ACTION_SEND)
-                    //set the type of data to share
                     shareIntent.type = "text/plain"
-                    //set the data to share, in this case, the text
                     shareIntent.putExtra(Intent.EXTRA_TEXT, shareText)
-                    //start the activity to share the text, with a chooser to select the app
                     context.startActivity(Intent.createChooser(shareIntent, "Share via"))
 
                 }
@@ -444,9 +411,6 @@ fun Insights(navController: NavHostController) {
 }
 
 
-
-
-
 @Composable
 fun Nutricoach() {
     Text("Nutricoach")
@@ -456,7 +420,7 @@ fun Nutricoach() {
 fun Settings() {
     Text("Settings")
 }
-
+//following code is taken from the lecture/Applied and modified accordingly
 @Composable
 fun MyNavHost(innerpadding: PaddingValues, navController: NavHostController) {
     NavHost(
