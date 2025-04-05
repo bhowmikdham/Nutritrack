@@ -1,5 +1,4 @@
 package com.fit2081.nutritrack
-
 import android.app.TimePickerDialog
 import android.content.Intent
 import android.icu.util.Calendar
@@ -99,7 +98,7 @@ fun timePickerFun(context: android.content.Context, mTime: MutableState<String>)
 fun FoodIntakeQuestionnaire() {
     val context = LocalContext.current
     var Checkbox_Error by remember { mutableStateOf(false) }
-    var Persona_Error by remember { mutableStateOf(false) }
+    var persona_error by remember { mutableStateOf(false) }
     var biggestMealTime_Error by remember { mutableStateOf(false) }
     var SleepTime_Error by remember { mutableStateOf(false) }
     var WakeTime_Error by remember { mutableStateOf(false) }
@@ -677,7 +676,7 @@ fun FoodIntakeQuestionnaire() {
                         }
                     }
                 }
-                if (Persona_Error){
+                if (persona_error){
                     Spacer(modifier = Modifier.height(4.dp))
                     Text("Please select a Persona", color = Color.Red)}
                 /**
@@ -732,7 +731,7 @@ fun FoodIntakeQuestionnaire() {
                         modifier = Modifier.weight(1f),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text("What time of day approx. do you normally eat your biggest meal?", fontSize = 13.sp)
+                        Text("What time of day approx. do you go to sleep at night?", fontSize = 13.sp)
                     }
                     Column(
                         modifier = Modifier.weight(0.7f),
@@ -769,7 +768,7 @@ fun FoodIntakeQuestionnaire() {
                         modifier = Modifier.weight(1f),
                         horizontalAlignment = Alignment.Start
                     ) {
-                        Text("What time of day approx. do you normally eat your biggest meal?", fontSize = 13.sp)
+                        Text("What time of day approx. do you wake up in the morning?", fontSize = 13.sp)
                     }
                     Column(
                         modifier = Modifier.weight(1f),
@@ -808,19 +807,19 @@ fun FoodIntakeQuestionnaire() {
                         .fillMaxWidth()
                         .height(50.dp),
                     onClick = {
-                        // Reset error states
+                        // Resetting all the states to false , this is doone to avoid any prev errors to clash with the follwoing checking
                         Checkbox_Error = false
-                        Persona_Error = false
+                        persona_error = false
                         biggestMealTime_Error = false
                         SleepTime_Error = false
                         WakeTime_Error = false
 
-                        // Independent validation checks:
+                        //validation checks:
                         if (!(fruits || vegetables || grains || redMeat || seafood || poultry || fish || eggs || nutsSeeds)) {
                             Checkbox_Error = true
                         }
                         if (selectedPersona.isEmpty()) {
-                            Persona_Error = true
+                            persona_error = true
                         }
                         if (biggestMealTime.value.isEmpty()) {
                             biggestMealTime_Error = true
@@ -832,8 +831,8 @@ fun FoodIntakeQuestionnaire() {
                             WakeTime_Error = true
                         }
 
-                        // Final check: if any error flag is set, show a Toast; otherwise, proceed
-                        if (Checkbox_Error || Persona_Error || biggestMealTime_Error || SleepTime_Error || WakeTime_Error) {
+                        // Final check: if any error flag is set WE SHOW A TOAST
+                        if (Checkbox_Error || persona_error || biggestMealTime_Error || SleepTime_Error || WakeTime_Error) {
                             Toast.makeText(context, "Please fill in all missing fields", Toast.LENGTH_LONG).show()
                         } else {
                             saveDialog = true
@@ -843,7 +842,11 @@ fun FoodIntakeQuestionnaire() {
                 ) {
                     Text("Review And Continue", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }
-                //Creating a dialog box for confirmation of the information entered
+                /**
+                 *
+                 * Confirmation Dialogue
+                 *
+                 */
                 if (saveDialog) {
                     AlertDialog(
                         onDismissRequest = { saveDialog = false },
