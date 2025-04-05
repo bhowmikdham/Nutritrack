@@ -81,8 +81,6 @@ fun WelcomeScreen(modifier: Modifier = Modifier) {
             alignment = Alignment.Center,
                 contentScale = ContentScale.FillBounds
         )
-
-
             Text("This app provides general health and nutrition information for educational purposes only. It is not intended as " +
                     "medical advice, diagnosis, or treatment. Always consult a qualified healthcare professional " +
                     "before making any changes to your diet, exercise, or health regimen. " +
