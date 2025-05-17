@@ -88,7 +88,7 @@ fun getUserHIEFAScore(context: Context, userId: String): String? {
 }
 
 @Composable
-fun HomePage() {
+fun HomePage(navController: NavHostController) {
     val context = LocalContext.current
     val sharedPrefs = context.getSharedPreferences("my_prefs", Context.MODE_PRIVATE)
     val user = sharedPrefs.getString("user_id", "")
@@ -141,7 +141,7 @@ fun HomePage() {
                 ) {
                     Button(
                         modifier = Modifier.height(35.dp),
-                        onClick = { context.startActivity(Intent(context, Login::class.java)) },
+                        onClick = { navController.navigate("Insights") },
                         colors = ButtonDefaults.buttonColors(Color.White)
                     ) {
                         Text("See all Scores", color = Color.Gray)
@@ -428,7 +428,7 @@ fun MyNavHost(innerpadding: PaddingValues, navController: NavHostController) {
         startDestination = "Home" // Fixed startDestination to "Home"
     ) {
         composable("Home") {
-            HomePage()
+            HomePage(navController = navController)
         }
         composable("Insights") {
             Insights(navController = navController)
