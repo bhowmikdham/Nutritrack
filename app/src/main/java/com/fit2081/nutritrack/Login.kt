@@ -345,6 +345,15 @@ fun LoginScreen(modifier: Modifier = Modifier) {
                 ) {
                     Text("Continue",color = Color.Black)
                 }
+                Spacer(modifier = Modifier.height(20.dp))
+                Button(
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
+                    onClick = { context.startActivity(Intent(context,Register::class.java))}
+                ) {Text("Register",color = Color.Black) }
             }
         }
     }
