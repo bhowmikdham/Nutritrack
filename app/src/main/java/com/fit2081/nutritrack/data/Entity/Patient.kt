@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 data class Patient(
     @PrimaryKey val userId: String,
     val phoneNumber: String,
-    val password: String,           // new field for login security (hashed)
+    val password: String,
     val name: String,
     val sex: String,
     val heifaScore: Int

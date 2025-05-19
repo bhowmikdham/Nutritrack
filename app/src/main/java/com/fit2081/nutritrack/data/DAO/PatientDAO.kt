@@ -6,7 +6,7 @@ import androidx.room.Query
 import com.fit2081.nutritrack.data.Entity.Patient
 
 @Dao
-interface PatientDao {
+interface PatientDAO {
     @Query("SELECT userId FROM patient")
     suspend fun getAllUserIds(): List<String>
 

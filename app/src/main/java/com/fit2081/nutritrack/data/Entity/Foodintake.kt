@@ -12,7 +12,7 @@ import androidx.room.PrimaryKey
         onDelete = ForeignKey.CASCADE
     )]
 )
-data class FoodIntake(
+data class Foodintake(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val patientId: String,
     val questionKey: String,
