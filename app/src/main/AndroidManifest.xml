@@ -1,69 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.fit2081.nutritrack">
 
     <application
-        android:name=".NutritrackApp"
         android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Nutritrack"
-        tools:targetApi="31">
+        android:theme="@style/Theme.Nutritrack">
+
+        <!-- Registration screen -->
         <activity
             android:name=".Register"
             android:exported="false"
-            android:label="@string/title_activity_register"
-            android:theme="@style/Theme.Nutritrack" />
-        <activity
-            android:name=".Nutricoach"
-            android:exported="false"
-            android:label="@string/title_activity_nutricoach"
-            android:theme="@style/Theme.Nutritrack" />
-        <activity
-            android:name=".Settings"
-            android:exported="false"
-            android:label="@string/title_activity_settings"
-            android:theme="@style/Theme.Nutritrack" />
-        <activity
-            android:name=".Insights"
-            android:exported="false"
-            android:label="@string/title_activity_insights"
-            android:theme="@style/Theme.Nutritrack" />
-    <activity
-            android:name=".Questionnaire.QuestionnaireActivity"
-            android:exported="false"
-            android:label="@string/title_activity_questionnaire"
-            android:theme="@style/Theme.Nutritrack" />
-        <activity
-            android:name=".MainActivity2"
-            android:exported="false"
-            android:label="@string/title_activity_main2"
-            android:theme="@style/Theme.Nutritrack" />
-        <activity
-            android:name=".Dashboard"
-            android:exported="false"
-            android:label="@string/title_activity_dashboard"
-            android:theme="@style/Theme.Nutritrack" />
+            android:label="@string/title_activity_register" />
+
+        <!-- Login screen -->
         <activity
             android:name=".LoginActivity"
             android:exported="false"
-            android:label="@string/title_activity_login"
-            android:theme="@style/Theme.Nutritrack" />
+            android:label="@string/title_activity_login" />
+
+        <!-- Questionnaire screen -->
+        <activity
+            android:name=".Questionnaire"
+            android:exported="false"
+            android:label="@string/title_activity_questionnaire" />
+
+        <!-- Dashboard screen -->
+        <activity
+            android:name=".Dashboard"
+            android:exported="false"
+            android:label="@string/title_activity_dashboard" />
+
+        <!-- This one is your launcher -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.Nutritrack">
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>
-
 </manifest>

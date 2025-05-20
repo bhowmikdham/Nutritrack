@@ -1,4 +1,4 @@
-package com.fit2081.nutritrack.Questionnaire
+package com.fit2081.nutritrack
 
 import android.app.TimePickerDialog
 import android.os.Bundle
@@ -23,101 +23,68 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.fit2081.nutritrack.R
-import com.fit2081.nutritrack.Questionnaire.QuestionnaireActivity
-import com.fit2081.nutritrack.Questionnaire.QuestionnaireScreen
 import com.fit2081.nutritrack.QuestionnaireViewModel.FoodintakeState
 import com.fit2081.nutritrack.QuestionnaireViewModel.QuestionnaireViewModel
-import dagger.hilt.android.AndroidEntryPoint
+import com.fit2081.nutritrack.data.AppDatabase
+import com.fit2081.nutritrack.data.Repo.IntakeRepository
+import com.fit2081.nutritrack.navigation.Screen
 import java.util.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 
-@AndroidEntryPoint
-class QuestionnaireActivity : ComponentActivity() {
+/**
+ * Activity hosting the Questionnaire flow.
+ */
+class Questionnaire : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // Manual DI: database -> repo -> viewModel
+        val db = AppDatabase.getDatabase(this)
+        val intakeRepo = IntakeRepository(db.foodIntakeDAO())
+        val vm = QuestionnaireViewModel(intakeRepo)
+        val patientId = intent.getStringExtra("userId") ?: ""
+
         setContent {
-            // Hosted by Compose NavGraph
+            MaterialTheme {
+                val navController = rememberNavController()
+                QuestionnaireScreen(
+                    patientId = patientId,
+                    navController = navController,
+                    vm = vm
+                )
+            }
         }
     }
 }
 
-// ---------------------------------------------------------------------------------------------
-// Time Picker Helper
-// ---------------------------------------------------------------------------------------------
-
-@Composable
-private fun TimePickerSection(
-    vm: QuestionnaireViewModel,
-    state: FoodintakeState
-) {
-    val context = LocalContext.current
-    val calendar = Calendar.getInstance()
-
-    fun showPicker(field: String, initial: String) {
-        val parts = initial.split(':')
-        val hour = parts.getOrNull(0)?.toIntOrNull() ?: calendar.get(Calendar.HOUR_OF_DAY)
-        val minute = parts.getOrNull(1)?.toIntOrNull() ?: calendar.get(Calendar.MINUTE)
-        TimePickerDialog(context, { _, h, m ->
-            vm.onTimeChange(field, String.format("%02d:%02d", h, m))
-        }, hour, minute, true).show()
-    }
-
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        OutlinedButton(
-            onClick = { showPicker("biggest_meal_time", state.biggestMealTime) },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(8.dp)
-        ) {
-            Icon(Icons.Default.DateRange, contentDescription = null)
-            Spacer(Modifier.width(8.dp))
-            Text(if (state.biggestMealTime.isBlank()) "Select Biggest Meal Time" else state.biggestMealTime)
-        }
-        OutlinedButton(
-            onClick = { showPicker("sleep_time", state.sleepTime) },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(8.dp)
-        ) {
-            Icon(Icons.Default.DateRange, contentDescription = null)
-            Spacer(Modifier.width(8.dp))
-            Text(if (state.sleepTime.isBlank()) "Select Sleep Time" else state.sleepTime)
-        }
-        OutlinedButton(
-            onClick = { showPicker("wake_time", state.wakeTime) },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(8.dp)
-        ) {
-            Icon(Icons.Default.DateRange, contentDescription = null)
-            Spacer(Modifier.width(8.dp))
-            Text(if (state.wakeTime.isBlank()) "Select Wake Time" else state.wakeTime)
-        }
-    }
-}
-
-// ---------------------------------------------------------------------------------------------
-// Main QuestionnaireScreen
-// ---------------------------------------------------------------------------------------------
-
-
+/**
+ * Main UI for the questionnaire: food choices, persona, and timings.
+ */
 @Composable
 fun QuestionnaireScreen(
     patientId: String,
     navController: NavHostController,
-    vm: QuestionnaireViewModel = hiltViewModel()
+    vm: QuestionnaireViewModel
 ) {
     val context = LocalContext.current
+    // Load any existing response
     LaunchedEffect(patientId) { vm.loadResponse(patientId) }
     val state by vm.state.collectAsState()
+
     var showCancel by remember { mutableStateOf(false) }
     var showInfo by remember { mutableStateOf<Pair<String, Boolean>>("" to false) }
     var showSummary by remember { mutableStateOf(false) }
 
-    // Cancel dialog
+    // Discard confirmation
     if (showCancel) {
         AlertDialog(
             onDismissRequest = { showCancel = false },
@@ -138,11 +105,7 @@ fun QuestionnaireScreen(
             title = { Text(persona, fontWeight = FontWeight.Bold) },
             text = {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Image(
-                        painter = painterResource(id = imgRes),
-                        contentDescription = persona,
-                        modifier = Modifier.height(160.dp)
-                    )
+                    Image(painter = painterResource(id = imgRes), contentDescription = persona, modifier = Modifier.height(160.dp))
                     Spacer(Modifier.height(8.dp))
                     Text(desc, textAlign = TextAlign.Center)
                 }
@@ -151,17 +114,26 @@ fun QuestionnaireScreen(
         )
     }
 
-    // Summary dialog
+    // Summary & submit dialog
     if (showSummary) {
         AlertDialog(
             onDismissRequest = { showSummary = false },
             title = { Text("Review Your Entries", fontWeight = FontWeight.Bold) },
             text = { SummaryContent(state) },
-            confirmButton = { TextButton(onClick = { showSummary = false; vm.saveResponse(patientId) }) { Text("Confirm") } },
+            confirmButton = {
+                TextButton(onClick = {
+                    showSummary = false
+                    vm.saveResponse(patientId)
+                    navController.navigate(Screen.Dashboard.createRoute(patientId)) {
+                        popUpTo(Screen.Welcome.route) { inclusive = true }
+                    }
+                }) { Text("Confirm") }
+            },
             dismissButton = { TextButton(onClick = { showSummary = false }) { Text("Edit") } }
         )
     }
 
+    // Questionnaire form
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
@@ -186,28 +158,7 @@ fun QuestionnaireScreen(
     }
 }
 
-// ---------------------------------------------------------------------------------------------
-// Helper Composables and Data
-// ---------------------------------------------------------------------------------------------
-
-private val personaDescriptions = mapOf(
-    "Health Devotee" to "I’m passionate about healthy eating…",
-    "Mindful Eater" to "Mindful eating helps you focus…",
-    "Wellness Striver" to "I aspire to be healthy…",
-    "Balanced Seeker" to "I try to live balanced…",
-    "Health Procrastinator" to "I’m contemplating healthy eating…",
-    "Food Carefree" to "I’m not bothered about healthy eating…"
-)
-
-private val personaImages = mapOf(
-    "Health Devotee" to R.drawable.persona_1,
-    "Mindful Eater" to R.drawable.persona_2,
-    "Wellness Striver" to R.drawable.persona_3,
-    "Balanced Seeker" to R.drawable.persona_4,
-    "Health Procrastinator" to R.drawable.persona_5,
-    "Food Carefree" to R.drawable.persona_6
-)
-
+// ------------------ Helpers & Sub-composables ------------------
 @Composable
 private fun HeaderRow(onCancel: () -> Unit) {
     Row(
@@ -215,7 +166,7 @@ private fun HeaderRow(onCancel: () -> Unit) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(Icons.Default.ArrowBack, contentDescription = "Back", modifier = Modifier.clickable(onClick = onCancel))
+        Icon(Icons.Default.ArrowBack, contentDescription = "Back", Modifier.clickable(onClick = onCancel))
         Text("Questionnaire", fontSize = 20.sp, fontWeight = FontWeight.Bold)
         Spacer(Modifier.width(24.dp))
     }
@@ -258,7 +209,11 @@ private fun FoodGrid(state: FoodintakeState, onToggle: (String, Boolean) -> Unit
 }
 
 @Composable
-private fun PersonaButtons(selected: String, onInfo: (String) -> Unit, onSelect: (String) -> Unit) {
+private fun PersonaButtons(
+    selected: String,
+    onInfo: (String) -> Unit,
+    onSelect: (String) -> Unit
+) {
     Text("Your Persona:", fontWeight = FontWeight.Bold)
     personaDescriptions.keys.chunked(3).forEach { row ->
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
@@ -280,6 +235,40 @@ private fun PersonaButtons(selected: String, onInfo: (String) -> Unit, onSelect:
 }
 
 @Composable
+private fun TimePickerSection(vm: QuestionnaireViewModel, state: FoodintakeState) {
+    val context = LocalContext.current
+    val calendar = Calendar.getInstance()
+    fun showPicker(field: String, initial: String) {
+        val parts = initial.split(':')
+        val hour = parts.getOrNull(0)?.toIntOrNull() ?: calendar.get(Calendar.HOUR_OF_DAY)
+        val minute = parts.getOrNull(1)?.toIntOrNull() ?: calendar.get(Calendar.MINUTE)
+        TimePickerDialog(context, { _, h, m -> vm.onTimeChange(field, "%02d:%02d".format(h, m)) }, hour, minute, true).show()
+    }
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        listOf(
+            "biggest_meal_time" to state.biggestMealTime,
+            "sleep_time" to state.sleepTime,
+            "wake_time" to state.wakeTime
+        ).forEach { (field, value) ->
+            OutlinedButton(
+                onClick = { showPicker(field, value) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Icon(Icons.Default.DateRange, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                val label = when(field) {
+                    "biggest_meal_time" -> "Select Biggest Meal Time"
+                    "sleep_time" -> "Select Sleep Time"
+                    else -> "Select Wake Time"
+                }
+                Text(if (value.isBlank()) label else value)
+            }
+        }
+    }
+}
+
+@Composable
 private fun SummaryContent(state: FoodintakeState) {
     Column {
         Text("Categories:", fontWeight = FontWeight.Bold)
@@ -295,8 +284,7 @@ private fun SummaryContent(state: FoodintakeState) {
             "Nuts & Seeds" to state.nutsSeeds
         ).forEach { (label, sel) -> if (sel) Text(label) }
         Spacer(Modifier.height(8.dp))
-        Text("Persona:", fontWeight = FontWeight.Bold)
-        Text(state.persona)
+        Text("Persona:", fontWeight = FontWeight.Bold); Text(state.persona)
         Spacer(Modifier.height(8.dp))
         Text("Timings:", fontWeight = FontWeight.Bold)
         Text("Biggest Meal: ${state.biggestMealTime}")
@@ -314,3 +302,21 @@ private fun isFormValid(state: FoodintakeState): Boolean {
     return anyFood && state.persona.isNotEmpty() &&
             state.biggestMealTime.isNotEmpty() && state.sleepTime.isNotEmpty() && state.wakeTime.isNotEmpty()
 }
+
+private val personaDescriptions = mapOf(
+    "Health Devotee" to "I’m passionate about healthy eating…",
+    "Mindful Eater" to "Mindful eating helps you focus…",
+    "Wellness Striver" to "I aspire to be healthy…",
+    "Balanced Seeker" to "I try to live balanced…",
+    "Health Procrastinator" to "I’m contemplating healthy eating…",
+    "Food Carefree" to "I’m not bothered about healthy eating…"
+)
+
+private val personaImages = mapOf(
+    "Health Devotee" to R.drawable.persona_1,
+    "Mindful Eater" to R.drawable.persona_2,
+    "Wellness Striver" to R.drawable.persona_3,
+    "Balanced Seeker" to R.drawable.persona_4,
+    "Health Procrastinator" to R.drawable.persona_5,
+    "Food Carefree" to R.drawable.persona_6
+)

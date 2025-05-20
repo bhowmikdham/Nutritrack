@@ -4,18 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fit2081.nutritrack.data.Entity.Foodintake
 import com.fit2081.nutritrack.data.Repo.IntakeRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-/**
- * UI state representing the full questionnaire response for a patient.
- */
+// ... FoodintakeState class unchanged ...
 data class FoodintakeState(
     val fruits: Boolean = false,
     val vegetables: Boolean = false,
@@ -33,20 +29,12 @@ data class FoodintakeState(
     val timestamp: Long = 0L
 )
 
-/**
- * ViewModel for loading, saving, and deleting a patient's questionnaire response.
- */
-@HiltViewModel
-class QuestionnaireViewModel @Inject constructor(
+class QuestionnaireViewModel(
     private val repository: IntakeRepository
 ) : ViewModel() {
-
     private val _state = MutableStateFlow(FoodintakeState())
     val state: StateFlow<FoodintakeState> = _state.asStateFlow()
 
-    /**
-     * Loads the saved response for the given patient, if any.
-     */
     fun loadResponse(patientId: String) {
         viewModelScope.launch {
             repository.getResponse(patientId).collectLatest { resp ->
@@ -74,9 +62,6 @@ class QuestionnaireViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Saves or updates the current state as the patient's questionnaire response.
-     */
     fun saveResponse(patientId: String) {
         viewModelScope.launch {
             val s = _state.value
@@ -103,19 +88,13 @@ class QuestionnaireViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Deletes the stored response and resets UI state.
-     */
     fun deleteResponse(patientId: String) {
         viewModelScope.launch {
             repository.deleteResponse(patientId)
             _state.value = FoodintakeState()
         }
     }
-    /** Update the selected eating persona. */
     fun onPersonaChange(persona: String) = _state.update { it.copy(persona = persona) }
-
-    /** Toggle a food category on or off. */
     fun onFoodToggle(key: String, value: Boolean) = _state.update { s ->
         when (key) {
             "fruits"       -> s.copy(fruits     = value)
@@ -130,8 +109,6 @@ class QuestionnaireViewModel @Inject constructor(
             else           -> s
         }
     }
-
-    /** Update one of the time fields: biggest meal, sleep, or wake. */
     fun onTimeChange(field: String, time: String) = _state.update { s ->
         when (field) {
             "biggest_meal_time" -> s.copy(biggestMealTime = time)
@@ -140,7 +117,4 @@ class QuestionnaireViewModel @Inject constructor(
             else                -> s
         }
     }
-
-
-
 }

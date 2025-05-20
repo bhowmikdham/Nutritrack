@@ -6,12 +6,16 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.fit2081.nutritrack.Questionnaire.QuestionnaireScreen
-import com.fit2081.nutritrack.Dashboard
-import com.fit2081.nutritrack.Nutricoach
-import com.fit2081.nutritrack.Settings
 import com.fit2081.nutritrack.WelcomeScreen
 import com.fit2081.nutritrack.LoginScreen
+import com.fit2081.nutritrack.QuestionnaireScreen
+import com.fit2081.nutritrack.QuestionnaireViewModel.QuestionnaireViewModel
+import com.fit2081.nutritrack.AuthViewModel
+import com.fit2081.nutritrack.data.AppDatabase
+import com.fit2081.nutritrack.data.Repo.IntakeRepository
+import com.fit2081.nutritrack.data.Repo.AuthRepository
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 
 sealed class Screen(val route: String) {
     object Welcome : Screen("welcome")
@@ -31,16 +35,30 @@ sealed class Screen(val route: String) {
 @Composable
 fun NavGraph(modifier: Modifier = Modifier) {
     val navController: NavHostController = rememberNavController()
-    NavHost(navController = navController, startDestination = Screen.Login.route, modifier = modifier) {
+    val context = LocalContext.current
+    // Manual DI: Create your repos and viewmodels here
+    val db = remember { AppDatabase.getDatabase(context) }
+    val authRepo = remember { AuthRepository(db.patientDAO()) }
+    val intakeRepo = remember { IntakeRepository(db.foodIntakeDAO()) }
+    val authViewModel = remember { AuthViewModel(authRepo) }
+    val questionnaireViewModel = remember { QuestionnaireViewModel(intakeRepo) }
+
+    NavHost(navController = navController, startDestination = Screen.Welcome.route, modifier = modifier) {
         composable(Screen.Welcome.route) {
-            WelcomeScreen(navController)
+            WelcomeScreen(
+                navController,
+                context = TODO(),
+                modifier = TODO()
+            )
         }
         composable(Screen.Login.route) {
-            LoginScreen(onSuccess = { id -> navController.navigate(Screen.Dashboard.createRoute(id)) })
+            LoginScreen(vm = authViewModel, onSuccess = { id ->
+                navController.navigate(Screen.Dashboard.createRoute(id))
+            })
         }
         composable(Screen.Questionnaire.route) { backStackEntry ->
             val id = backStackEntry.arguments?.getString("userId") ?: return@composable
-            QuestionnaireScreen(patientId = id, navController=navController)
+            QuestionnaireScreen(patientId = id, navController = navController, vm = questionnaireViewModel)
         }
         composable(Screen.Dashboard.route) { backStackEntry ->
             val id = backStackEntry.arguments?.getString("userId") ?: return@composable

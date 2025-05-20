@@ -12,38 +12,25 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 
-/**
- * Represents the possible outcomes of a login attempt.
- */
 sealed class LoginResult {
     object Success : LoginResult()
     object IncompleteRegistration : LoginResult()
     object InvalidCredentials : LoginResult()
 }
 
-/**
- * ViewModel for handling authentication logic.
- */
-@HiltViewModel
-class AuthViewModel @Inject constructor(
+class AuthViewModel(
     private val repo: AuthRepository
 ) : ViewModel() {
-    // Holds the list of valid user IDs for dropdown suggestions
     private val _userIds = MutableStateFlow<List<String>>(emptyList())
     val userIds = _userIds.asStateFlow()
 
-    // Input fields
     var userId by mutableStateOf("")
         private set
     var phone by mutableStateOf("")
         private set
     var password by mutableStateOf("")
         private set
-
-    // Validation flags
     var userIdError by mutableStateOf(false)
         private set
     var phoneError by mutableStateOf(false)
@@ -51,12 +38,10 @@ class AuthViewModel @Inject constructor(
     var registrationIncomplete by mutableStateOf(false)
         private set
 
-    // Emits the result of login attempts
     private val _loginResult = MutableSharedFlow<LoginResult>()
     val loginResult: SharedFlow<LoginResult> = _loginResult.asSharedFlow()
 
     init {
-        // Load all user IDs from repository
         viewModelScope.launch {
             repo.allUserIds.collect { ids ->
                 _userIds.value = ids
@@ -79,17 +64,12 @@ class AuthViewModel @Inject constructor(
         password = pw
     }
 
-    /**
-     * Executes when the user clicks the Continue button.
-     */
     fun onLoginClicked() {
         viewModelScope.launch {
-            // Reset error states
             userIdError = false
             phoneError = false
             registrationIncomplete = false
 
-            // 1) Verify the user ID exists
             val existsId = repo.isUserRegistered(userId)
             if (!existsId) {
                 userIdError = true
@@ -97,7 +77,6 @@ class AuthViewModel @Inject constructor(
                 return@launch
             }
 
-            // 2) Check if self-registration (name/password) is complete
             val complete = repo.isSelfRegistered(userId)
             if (!complete) {
                 registrationIncomplete = true
@@ -105,7 +84,6 @@ class AuthViewModel @Inject constructor(
                 return@launch
             }
 
-            // 3) Validate phone and password
             val valid = repo.login(userId, phone, password)
             if (!valid) {
                 phoneError = true
