@@ -34,6 +34,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.fit2081.nutritrack.Questionnaire.QuestionnaireActivity
+import com.fit2081.nutritrack.Questionnaire.QuestionnaireScreen
+import com.fit2081.nutritrack.QuestionnaireViewModel.QuestionnaireViewModel
 import com.fit2081.nutritrack.ui.theme.NutritrackTheme
 class Dashboard : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -121,7 +124,7 @@ fun HomePage(navController: NavHostController) {
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72),),
                 onClick = {
-                    context.startActivity(Intent(context,Questionnaire::class.java))
+                    context.startActivity(Intent(context, QuestionnaireActivity::class.java))
                 }
             ) {
                 Text("Edit Details", color = Color.Black)

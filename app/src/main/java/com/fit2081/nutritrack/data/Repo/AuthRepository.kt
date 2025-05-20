@@ -37,4 +37,13 @@ class AuthRepository @Inject constructor(
      */
     suspend fun isPhoneRegistered(phone: String): Boolean =
         patientDao.getByPhoneNumber(phone) != null
+
+    /**
+     * Has the patient filled in both name and password?
+     */
+    suspend fun isSelfRegistered(userId: String): Boolean {
+        val patient = patientDao.getById(userId)
+        // both fields must be non‐blank
+        return patient?.let { it.name.isNotBlank() && it.password.isNotBlank() } ?: false
+    }
 }

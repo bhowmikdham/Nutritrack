@@ -1,4 +1,5 @@
 package com.fit2081.nutritrack.data.DAO
+
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -18,4 +19,7 @@ interface PatientDAO {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(patients: List<Patient>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(patient: Patient): Long
 }

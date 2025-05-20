@@ -28,6 +28,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun intakeDAO(): FoodIntakeDAO
     abstract fun tipDAO(): CoachtipsDAO
 
+
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
