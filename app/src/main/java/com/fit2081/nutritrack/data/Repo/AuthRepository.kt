@@ -26,4 +26,23 @@ class AuthRepository(
         val patient = patientDao.getById(userId)
         return patient?.let { it.name.isNotBlank() && it.password.isNotBlank() } ?: false
     }
+
+    suspend fun getByPasswordAndUserID(userId: String, password: String): Patient? {
+        return patientDao.getByPasswordAndUserID(userId, password)
+    }
+
+    suspend fun getUsername(userId: String): String {
+        return patientDao.getUsername(userId)
+    }
+
+    suspend fun registerUser(
+        userId: String,
+        phone: String,
+        name: String,
+        password: String
+    ): Boolean {
+        val rows = patientDao.registerUser(userId, phone, name, password)
+        return rows == 1
+    }
+
 }

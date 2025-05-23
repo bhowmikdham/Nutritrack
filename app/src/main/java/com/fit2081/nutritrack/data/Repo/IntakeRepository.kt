@@ -17,4 +17,7 @@ class IntakeRepository(
     suspend fun deleteResponse(patientId: String) {
         dao.deleteResponse(patientId)
     }
+
+   fun hasRecord(patientId: String): Flow<Boolean> =
+        dao.hasrecord(patientId)
 }

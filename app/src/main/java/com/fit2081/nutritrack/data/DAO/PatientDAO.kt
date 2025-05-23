@@ -8,7 +8,7 @@ import com.fit2081.nutritrack.data.Entity.Patient
 
 @Dao
 interface PatientDAO {
-    @Query("SELECT userId FROM patient")
+    @Query("SELECT userId FROM patient order by CAST(userId AS INTEGER)")
     suspend fun getAllUserIds(): List<String>
 
     @Query("SELECT * FROM patient WHERE userId = :id")
@@ -16,6 +16,27 @@ interface PatientDAO {
 
     @Query("SELECT * FROM patient WHERE phoneNumber = :phone")
     suspend fun getByPhoneNumber(phone: String): Patient?
+
+    @Query("SELECT * FROM patient WHERE userId = :userId AND password = :password")
+    suspend fun getByPasswordAndUserID(userId: String, password: String): Patient?
+
+    @Query("""
+  UPDATE Patient
+    SET name       = :name,
+        password   = :password
+  WHERE userId      = :userId
+    AND phoneNumber = :phone
+""")
+    suspend fun registerUser(
+        userId: String,
+        phone:  String,
+        name:   String,
+        password: String
+    ): Int
+
+    @Query("SELECT name FROM patient WHERE userId = :userId")
+    suspend fun getUsername(userId: String): String
+
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(patients: List<Patient>)

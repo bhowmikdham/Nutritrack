@@ -2,44 +2,34 @@ package com.fit2081.nutritrack
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.fit2081.nutritrack.data.AuthManager
 import com.fit2081.nutritrack.data.Repo.AuthRepository
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-
-sealed class LoginResult {
-    object Success : LoginResult()
-    object IncompleteRegistration : LoginResult()
-    object InvalidCredentials : LoginResult()
-}
 
 class AuthViewModel(
     private val repo: AuthRepository
 ) : ViewModel() {
+
+    // --- UI State Flows ---
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _loginSuccess = MutableStateFlow<Boolean?>(null) // null = not attempted yet
+    val loginSuccess: StateFlow<Boolean?> = _loginSuccess.asStateFlow()
+
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+
+    private val _isNotRegistered = MutableStateFlow(false)
+    val isNotRegistered: StateFlow<Boolean> = _isNotRegistered.asStateFlow()
+
+    private val _hasCompletedFoodIntake = MutableStateFlow<Boolean?>(null)
+    val hasCompletedFoodIntake: StateFlow<Boolean?> = _hasCompletedFoodIntake.asStateFlow()
+
+    // --- Load dropdown user IDs ---
     private val _userIds = MutableStateFlow<List<String>>(emptyList())
-    val userIds = _userIds.asStateFlow()
-
-    var userId by mutableStateOf("")
-        private set
-    var phone by mutableStateOf("")
-        private set
-    var password by mutableStateOf("")
-        private set
-    var userIdError by mutableStateOf(false)
-        private set
-    var phoneError by mutableStateOf(false)
-        private set
-    var registrationIncomplete by mutableStateOf(false)
-        private set
-
-    private val _loginResult = MutableSharedFlow<LoginResult>()
-    val loginResult: SharedFlow<LoginResult> = _loginResult.asSharedFlow()
+    val userIds: StateFlow<List<String>> = _userIds.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -49,48 +39,64 @@ class AuthViewModel(
         }
     }
 
-    fun onUserIdChange(id: String) {
-        userId = id
-        userIdError = false
-        registrationIncomplete = false
-    }
-
-    fun onPhoneChange(p: String) {
-        phone = p
-        phoneError = false
-    }
-
-    fun onPasswordChange(pw: String) {
-        password = pw
-    }
-
-    fun onLoginClicked() {
+    /**
+     * Kick off the entire login flow in one place:
+     * 1) Does the user exist?
+     * 2) Have they completed registration (name & password)?
+     * 3) Does the password match?
+     * 4) Check food-intake completion.
+     */
+    fun validateAndLogin(userId: String, password: String) {
         viewModelScope.launch {
-            userIdError = false
-            phoneError = false
-            registrationIncomplete = false
+            // Reset everything
+            _isLoading.value = true
+            _loginSuccess.value = null
+            _errorMessage.value = null
+            _isNotRegistered.value = false
+            _hasCompletedFoodIntake.value = null
 
-            val existsId = repo.isUserRegistered(userId)
-            if (!existsId) {
-                userIdError = true
-                _loginResult.emit(LoginResult.InvalidCredentials)
-                return@launch
-            }
+            try {
+                // 1) user exists?
+                if (!repo.isUserRegistered(userId)) {
+                    _errorMessage.value = "User ID not found"
+                    return@launch
+                }
 
-            val complete = repo.isSelfRegistered(userId)
-            if (!complete) {
-                registrationIncomplete = true
-                _loginResult.emit(LoginResult.IncompleteRegistration)
-                return@launch
-            }
+                // 2) registration complete?
+                if (!repo.isSelfRegistered(userId)) {
+                    _isNotRegistered.value = true
+                    return@launch
+                }
 
-            val valid = repo.login(userId, phone, password)
-            if (!valid) {
-                phoneError = true
-                _loginResult.emit(LoginResult.InvalidCredentials)
-            } else {
-                _loginResult.emit(LoginResult.Success)
+                // 3) password check
+                val patient = repo.getByPasswordAndUserID(userId, password)
+                if (patient == null) {
+                    _errorMessage.value = "Incorrect password"
+                    return@launch
+                }
+
+                // 4) success — persist session
+                AuthManager.signIn(userId)
+                _loginSuccess.value = true
+
+//                // 5) bonus: fetch food-intake completion
+//                val completed = repo.hasFoodIntakeRecords(userId)
+//                _hasCompletedFoodIntake.value = completed
+
+            } catch (e: Exception) {
+                _errorMessage.value = e.message ?: "Unknown error"
+            } finally {
+                _isLoading.value = false
             }
         }
+    }
+
+    /** Call this if you ever need to retry or reset the UI state */
+    fun resetLoginState() {
+        _isLoading.value = false
+        _loginSuccess.value = null
+        _errorMessage.value = null
+        _isNotRegistered.value = false
+        _hasCompletedFoodIntake.value = null
     }
 }

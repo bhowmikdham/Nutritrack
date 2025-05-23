@@ -28,4 +28,15 @@ interface FoodIntakeDAO {
      */
     @Query("DELETE FROM food_intake WHERE patientId = :patientId")
     suspend fun deleteResponse(patientId: String)
+
+    @Query("SELECT CASE \n" +
+            "           WHEN EXISTS (\n" +
+            "               SELECT 1 \n" +
+            "               FROM food_intake \n" +
+            "               WHERE patientId = :patientId \n" +
+            "           ) THEN TRUE\n" +
+            "           ELSE FALSE\n" +
+            "       END AS record_exists;")
+   fun hasrecord(patientId: String): Flow<Boolean>
+
 }

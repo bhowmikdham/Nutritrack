@@ -1,6 +1,7 @@
 package com.fit2081.nutritrack
 
 import android.app.TimePickerDialog
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -39,6 +40,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import com.fit2081.nutritrack.data.AuthManager.currentUserId
+import com.fit2081.nutritrack.data.AuthManager
+
 
 /**
  * Activity hosting the Questionnaire flow.
@@ -51,7 +55,13 @@ class Questionnaire : ComponentActivity() {
         val db = AppDatabase.getDatabase(this)
         val intakeRepo = IntakeRepository(db.foodIntakeDAO())
         val vm = QuestionnaireViewModel(intakeRepo)
-        val patientId = intent.getStringExtra("userId") ?: ""
+
+        // ← instead of intent extra, read from AuthManager
+        val patientId = AuthManager.currentUserId() ?: run {
+            startActivity(Intent(this, Login::class.java))
+            finish()
+            return
+        }
 
         setContent {
             MaterialTheme {
@@ -66,7 +76,7 @@ class Questionnaire : ComponentActivity() {
     }
 }
 
-/**
+    /**
  * Main UI for the questionnaire: food choices, persona, and timings.
  */
 @Composable
@@ -90,7 +100,7 @@ fun QuestionnaireScreen(
             onDismissRequest = { showCancel = false },
             title = { Text("Discard?", fontWeight = FontWeight.Bold) },
             text = { Text("Lose all changes?") },
-            confirmButton = { TextButton(onClick = { showCancel = false; navController.popBackStack() }) { Text("Yes") } },
+            confirmButton = { TextButton(onClick = { showCancel = false; navController.navigate(Login::class.java)}) { Text("Yes") } },
             dismissButton = { TextButton(onClick = { showCancel = false }) { Text("No") } }
         )
     }
@@ -113,7 +123,6 @@ fun QuestionnaireScreen(
             confirmButton = { TextButton(onClick = { showInfo = persona to false }) { Text("OK") } }
         )
     }
-
     // Summary & submit dialog
     if (showSummary) {
         AlertDialog(

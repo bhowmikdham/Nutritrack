@@ -2,6 +2,7 @@ package com.fit2081.nutritrack
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -24,6 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
@@ -46,34 +48,48 @@ import com.fit2081.nutritrack.data.Repo.IntakeRepository
 import com.fit2081.nutritrack.navigation.Screen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.fit2081.nutritrack.HomePage
+import com.fit2081.nutritrack.data.AuthManager
+import com.fit2081.nutritrack.navigation.NavGraph
+import com.fit2081.nutritrack.ui.theme.NutritrackTheme
 import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
-    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Initialize database and repositories
+        // Initialize AuthManager for persistent login
+        AuthManager.init(this)
+
+        // Initialize and seed database
         val db = AppDatabase.getDatabase(this)
         seedDatabaseOnce(db)
-        val authRepo = AuthRepository(db.patientDAO())
-        val intakeRepo = IntakeRepository(db.foodIntakeDAO())
 
-        // Manual DI of ViewModels
-        val authViewModel = AuthViewModel(authRepo)
-        val questionnaireViewModel = QuestionnaireViewModel(intakeRepo)
-
+        // Launch Compose content hosting NavGraph with auto-redirect
         setContent {
-            MaterialTheme {
+            NutritrackTheme {
+                // Create a single NavController
                 val navController = rememberNavController()
-                Scaffold(modifier = Modifier.fillMaxSize()) {
-                    MainNavHost(
-                        navController = navController,
-                        authViewModel = authViewModel,
-                        questionnaireViewModel = questionnaireViewModel
-                    )
+                val currentUser = AuthManager.currentUserId()
+                // On startup, if logged in, navigate to the correct screen
+                LaunchedEffect(currentUser) {
+                    if (currentUser != null) {
+                        val prefs = getSharedPreferences("prefs_$currentUser", MODE_PRIVATE)
+                        val completed = prefs.getBoolean("QuestionnaireCompleted", false)
+                        val dest = if (completed) {
+                            Screen.Dashboard.createRoute(currentUser)
+                        } else {
+                            Screen.Questionnaire.createRoute(currentUser)
+                        }
+                        navController.navigate(dest) {
+                            popUpTo(Screen.Welcome.route) { inclusive = true }
+                        }
+                    }
                 }
+
+                // Host the NavGraph, passing in our navController
+                NavGraph(navController = navController)
             }
         }
     }
@@ -228,58 +244,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
-@SuppressLint("ContextCastToActivity")
-@Composable
-fun MainNavHost(
-    navController: NavHostController,
-    authViewModel: AuthViewModel,
-    questionnaireViewModel: QuestionnaireViewModel
-) {
-    NavHost(
-        navController = navController,
-        startDestination = Screen.Welcome.route
-    ) {
-        composable(Screen.Welcome.route) {
-            val context = LocalContext.current as MainActivity
-            WelcomeScreen(navController = navController, context = context)
-        }
-        composable(Screen.Login.route) {
-            LoginScreen(vm = authViewModel) { userId ->
-                val dest = if (isQuestionnaireDone(userId))
-                    Screen.Dashboard.createRoute(userId)
-                else
-                    Screen.Questionnaire.createRoute(userId)
-                navController.navigate(dest) {
-                    popUpTo(Screen.Welcome.route) { inclusive = true }
-                }
-            }
-        }
-        composable(Screen.Questionnaire.route) { backStack ->
-            val userId = backStack.arguments?.getString("userId") ?: return@composable
-            QuestionnaireScreen(
-                patientId = userId,
-                navController = navController,
-                vm = questionnaireViewModel
-            )
-        }
-        composable(Screen.Dashboard.route) { backStack ->
-            val userId = backStack.arguments?.getString("userId") ?: return@composable
-            //DashboardScreen(
-                //  userId = userId,
-                //onCoachClick = { navController.navigate(Screen.Coach.createRoute(userId)) },
-                //onSettingsClick = { navController.navigate(Screen.Settings.createRoute(userId)) })
-        }
-        composable(Screen.Coach.route) { backStack ->
-            val userId = backStack.arguments?.getString("userId") ?: return@composable
-            //CoachScreen(userId)
-        }
-        composable(Screen.Settings.route) { backStack ->
-            val userId = backStack.arguments?.getString("userId") ?: return@composable
-            //SettingsScreen(userId)
-        }
-    }
-}
 
 @Composable
 fun WelcomeScreen(
