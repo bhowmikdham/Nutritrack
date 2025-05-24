@@ -8,7 +8,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -25,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -33,14 +31,15 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.fit2081.nutritrack.data.AppDatabase
 import com.fit2081.nutritrack.data.Repo.AuthRepository
 import com.fit2081.nutritrack.ui.theme.NutritrackTheme
-import kotlinx.coroutines.launch
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.fit2081.nutritrack.navigation.Screen
 
+// Activity for standalone use (if needed)
 class Login : ComponentActivity() {
     private val authRepo by lazy {
         AuthRepository(AppDatabase.getDatabase(this).patientDAO())
@@ -52,17 +51,26 @@ class Login : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             NutritrackTheme {
-                LoginScreen(
+                // Note: This uses the simple version for Activity-based navigation
+                LoginScreenSimple(
                     vm = vm,
                     onNavigate = { userId ->
                         val prefs = getSharedPreferences("prefs_$userId", MODE_PRIVATE)
                         val completed = prefs.getBoolean("QuestionnaireCompleted", false)
-                        val destClass = if (completed) Screen.Dashboard::class.java else Questionnaire::class.java
+                        val destClass = if (completed) MainActivity::class.java else Questionnaire::class.java
                         startActivity(Intent(this, destClass))
                         finish()
                     },
                     onRegister = {
                         startActivity(Intent(this, RegisterActivity::class.java))
+                    },
+                    onForgotPassword = {
+                        // For Activity-based navigation, you'd create a ForgotPasswordActivity
+                        android.widget.Toast.makeText(
+                            this,
+                            "Use the main app for Forgot Password feature",
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
                     }
                 )
             }
@@ -70,33 +78,122 @@ class Login : ComponentActivity() {
     }
 }
 
+// Simple version for Activity-based navigation
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(
+fun LoginScreenSimple(
     vm: AuthViewModel,
     onNavigate: (String) -> Unit,
-    onRegister: () -> Unit
+    onRegister: () -> Unit,
+    onForgotPassword: () -> Unit
 ) {
-    // 1) ViewModel state
-    val userIds               by vm.userIds.collectAsState()
-    val isLoading             by vm.isLoading.collectAsState()
-    val loginSuccess          by vm.loginSuccess.collectAsState()
-    val errorMessage          by vm.errorMessage.collectAsState()
-    val notRegistered         by vm.isNotRegistered.collectAsState()
+    // ViewModel state
+    val userIds by vm.userIds.collectAsState()
+    val isLoading by vm.isLoading.collectAsState()
+    val loginSuccess by vm.loginSuccess.collectAsState()
+    val errorMessage by vm.errorMessage.collectAsState()
+    val notRegistered by vm.isNotRegistered.collectAsState()
 
-    // 2) Local, rotation-safe form state
+    // Local form state
     var dropdownExpanded by rememberSaveable { mutableStateOf(false) }
-    var selectedId       by rememberSaveable { mutableStateOf("") }
-    var passwordText     by rememberSaveable { mutableStateOf("") }
-    var showPassword     by rememberSaveable { mutableStateOf(false) }
+    var selectedId by rememberSaveable { mutableStateOf("") }
+    var passwordText by rememberSaveable { mutableStateOf("") }
+    var showPassword by rememberSaveable { mutableStateOf(false) }
 
-    // 3) Navigate on success
+    // Navigate on success
     LaunchedEffect(loginSuccess) {
         if (loginSuccess == true) {
             onNavigate(selectedId)
         }
     }
 
+    LoginScreenContent(
+        userIds = userIds,
+        isLoading = isLoading,
+        errorMessage = errorMessage,
+        notRegistered = notRegistered,
+        dropdownExpanded = dropdownExpanded,
+        selectedId = selectedId,
+        passwordText = passwordText,
+        showPassword = showPassword,
+        onDropdownExpandedChange = { dropdownExpanded = it },
+        onSelectedIdChange = { selectedId = it },
+        onPasswordTextChange = { passwordText = it },
+        onShowPasswordChange = { showPassword = it },
+        onLogin = { vm.validateAndLogin(selectedId, passwordText) },
+        onRegister = onRegister,
+        onForgotPassword = onForgotPassword
+    )
+}
+
+// Navigation Compose version (Main version to use)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LoginScreen(
+    vm: AuthViewModel,
+    navController: NavHostController,
+    onNavigate: (String) -> Unit,
+    onRegister: () -> Unit
+) {
+    // ViewModel state
+    val userIds by vm.userIds.collectAsState()
+    val isLoading by vm.isLoading.collectAsState()
+    val loginSuccess by vm.loginSuccess.collectAsState()
+    val errorMessage by vm.errorMessage.collectAsState()
+    val notRegistered by vm.isNotRegistered.collectAsState()
+
+    // Local form state
+    var dropdownExpanded by rememberSaveable { mutableStateOf(false) }
+    var selectedId by rememberSaveable { mutableStateOf("") }
+    var passwordText by rememberSaveable { mutableStateOf("") }
+    var showPassword by rememberSaveable { mutableStateOf(false) }
+
+    // Navigate on success
+    LaunchedEffect(loginSuccess) {
+        if (loginSuccess == true) {
+            onNavigate(selectedId)
+        }
+    }
+
+    LoginScreenContent(
+        userIds = userIds,
+        isLoading = isLoading,
+        errorMessage = errorMessage,
+        notRegistered = notRegistered,
+        dropdownExpanded = dropdownExpanded,
+        selectedId = selectedId,
+        passwordText = passwordText,
+        showPassword = showPassword,
+        onDropdownExpandedChange = { dropdownExpanded = it },
+        onSelectedIdChange = { selectedId = it },
+        onPasswordTextChange = { passwordText = it },
+        onShowPasswordChange = { showPassword = it },
+        onLogin = { vm.validateAndLogin(selectedId, passwordText) },
+        onRegister = onRegister,
+        onForgotPassword = { navController.navigate(Screen.ForgotPassword.route) }
+    )
+}
+
+// Shared UI content to avoid duplication
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LoginScreenContent(
+    userIds: List<String>,
+    isLoading: Boolean,
+    errorMessage: String?,
+    notRegistered: Boolean,
+    dropdownExpanded: Boolean,
+    selectedId: String,
+    passwordText: String,
+    showPassword: Boolean,
+    onDropdownExpandedChange: (Boolean) -> Unit,
+    onSelectedIdChange: (String) -> Unit,
+    onPasswordTextChange: (String) -> Unit,
+    onShowPasswordChange: (Boolean) -> Unit,
+    onLogin: () -> Unit,
+    onRegister: () -> Unit,
+    onForgotPassword: () -> Unit
+) {
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = Color(0xFFF8F5F5)
@@ -111,8 +208,7 @@ fun LoginScreen(
             Image(
                 painter = painterResource(id = R.drawable.onboarding),
                 contentDescription = "Main logo",
-                modifier = Modifier
-                    .aspectRatio(0.7f),
+                modifier = Modifier.aspectRatio(0.7f),
                 contentScale = ContentScale.Crop
             )
         }
@@ -139,11 +235,11 @@ fun LoginScreen(
             // User ID dropdown
             ExposedDropdownMenuBox(
                 expanded = dropdownExpanded,
-                onExpandedChange = { dropdownExpanded = !dropdownExpanded }
+                onExpandedChange = onDropdownExpandedChange
             ) {
                 OutlinedTextField(
                     value = selectedId,
-                    onValueChange = { selectedId = it },
+                    onValueChange = onSelectedIdChange,
                     label = { Text("My ID (Provided by your Clinician)") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     isError = errorMessage != null && !notRegistered,
@@ -156,23 +252,24 @@ fun LoginScreen(
                 )
                 ExposedDropdownMenu(
                     expanded = dropdownExpanded,
-                    onDismissRequest = { dropdownExpanded = false }
+                    onDismissRequest = { onDropdownExpandedChange(false) }
                 ) {
-                    userIds
-                        .forEach { id ->
-                            DropdownMenuItem(
-                                text = { Text(id) },
-                                onClick = {
-                                    selectedId = id
-                                    dropdownExpanded = false
-                                }
-                            )
-                        }
+                    userIds.forEach { id ->
+                        DropdownMenuItem(
+                            text = { Text(id) },
+                            onClick = {
+                                onSelectedIdChange(id)
+                                onDropdownExpandedChange(false)
+                            }
+                        )
+                    }
                 }
             }
+
+            // Error messages
             if (errorMessage != null && !notRegistered) {
                 Text(
-                    text = errorMessage ?: "",
+                    text = errorMessage,
                     color = MaterialTheme.colorScheme.error,
                     fontSize = 12.sp,
                     modifier = Modifier.padding(start = 8.dp, top = 4.dp)
@@ -180,7 +277,11 @@ fun LoginScreen(
             }
             if (notRegistered) {
                 TextButton(onClick = onRegister) {
-                    Text("Please Complete Self Registration", fontSize = 12.sp ,color = MaterialTheme.colorScheme.error)
+                    Text(
+                        "Please Complete Self Registration",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.error
+                    )
                 }
             }
 
@@ -189,20 +290,20 @@ fun LoginScreen(
             // Password field
             OutlinedTextField(
                 value = passwordText,
-                onValueChange = { passwordText = it },
+                onValueChange = onPasswordTextChange,
                 label = { Text("Password") },
                 visualTransformation = if (showPassword)
                     VisualTransformation.None
                 else
                     PasswordVisualTransformation(),
                 trailingIcon = {
-                    IconButton(onClick = { showPassword = !showPassword }) {
+                    IconButton(onClick = { onShowPasswordChange(!showPassword) }) {
                         Icon(
                             imageVector = if (showPassword)
                                 Icons.Filled.Visibility
                             else
                                 Icons.Filled.VisibilityOff,
-                            contentDescription = null
+                            contentDescription = if (showPassword) "Hide password" else "Show password"
                         )
                     }
                 },
@@ -215,8 +316,8 @@ fun LoginScreen(
 
             // Continue button
             Button(
-                onClick = { vm.validateAndLogin(selectedId, passwordText) },
-                enabled = !isLoading,
+                onClick = onLogin,
+                enabled = !isLoading && selectedId.isNotBlank() && passwordText.isNotBlank(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
@@ -225,17 +326,29 @@ fun LoginScreen(
                 if (isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = Color.Black
                     )
                 } else {
-                    Text("Continue", color = Color.Black)
+                    Text("Continue", color = Color.Black, fontWeight = FontWeight.Medium)
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
+
+            // Forgot Password link - Always visible now
+            TextButton(onClick = onForgotPassword) {
+                Text(
+                    "Forgot Password?",
+                    fontSize = 14.sp,
+                    color = Color(0xFF137A44),
+                    fontWeight = FontWeight.Medium
+                )
+            }
+
+            Spacer(Modifier.height(8.dp))
 
             Text(
-                text = "Haven't Register Already?",
+                text = "Haven't Registered Already?",
                 fontSize = 12.sp,
                 color = Color.Gray,
                 modifier = Modifier.padding(8.dp)
@@ -249,7 +362,7 @@ fun LoginScreen(
                     .height(50.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF8F5F5))
             ) {
-                Text("Register", color = Color.Black)
+                Text("Register", color = Color.Black, fontWeight = FontWeight.Medium)
             }
         }
     }

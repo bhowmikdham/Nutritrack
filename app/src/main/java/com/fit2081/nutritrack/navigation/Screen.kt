@@ -30,6 +30,7 @@ sealed class Screen(val route: String) {
     object Welcome           : Screen("welcome")
     object Login             : Screen("login")
     object Register          : Screen("register")
+    object ForgotPassword    : Screen("forgot_password")
     object ClinicianLogin    : Screen("clinician_login")
     object ClinicianDashboard: Screen("clinician_dashboard")
     object Questionnaire     : Screen("questionnaire/{userId}") {
@@ -79,7 +80,8 @@ fun NavGraph(
                 },
                 onRegister = {
                     navController.navigate(Screen.Register.route)
-                }
+                },
+                navController = navController 
             )
         }
 
@@ -102,6 +104,11 @@ fun NavGraph(
                     navController.popBackStack()
                 }
             )
+        }
+
+        // Forgot Password Screen
+        composable(Screen.ForgotPassword.route) {
+            ForgotPasswordScreen(navController = navController)
         }
 
         // Clinician Login Screen

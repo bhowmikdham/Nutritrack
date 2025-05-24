@@ -37,6 +37,20 @@ interface PatientDAO {
     @Query("SELECT name FROM patient WHERE userId = :userId")
     suspend fun getUsername(userId: String): String
 
+    @Query("SELECT EXISTS(SELECT 1 FROM patient WHERE userId = :userId)")
+    suspend fun existsByUserId(userId: String): Boolean
+
+    @Query("SELECT EXISTS(SELECT 1 FROM patient WHERE phoneNumber = :phone)")
+    suspend fun existsByPhone(phone: String): Boolean
+
+    @Query("SELECT EXISTS(SELECT 1 FROM patient WHERE userId = :userId AND phoneNumber = :phone)")
+    suspend fun existsByUserIdAndPhone(userId: String, phone: String): Boolean
+
+    @Query("UPDATE patient SET password = :newPassword WHERE userId = :userId AND phoneNumber = :phone")
+    suspend fun updatePasswordByUserIdAndPhone(userId: String, phone: String, newPassword: String): Int
+
+    @Query("SELECT * FROM patient WHERE userId = :userId AND phoneNumber = :phone")
+    suspend fun getByUserIdAndPhone(userId: String, phone: String): Patient?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(patients: List<Patient>)
