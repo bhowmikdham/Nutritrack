@@ -13,8 +13,14 @@ import kotlinx.coroutines.flow.Flow
 interface PatientHealthRecordsDAO {
 
     @Query("SELECT * FROM patient_health_record WHERE userId = :id")
-    fun getByUserId(id: String): Flow<PatientHealthRecords?>
+    fun getByUserId(id: String): Flow<List<PatientHealthRecords?>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(record: PatientHealthRecords)
+
+    @Query("SELECT COUNT(*) FROM PATIENT_HEALTH_RECORD WHERE userId = :userId")
+    suspend fun hasScores(userId: Int): Int
+
+    @Query("SELECT * FROM patient_health_record")
+    fun getAllRecords(): Flow<List<PatientHealthRecords?>>
 }

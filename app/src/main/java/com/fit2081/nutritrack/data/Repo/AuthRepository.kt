@@ -4,6 +4,12 @@ import com.fit2081.nutritrack.data.Entity.Patient
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
+data class UserProfile(
+    val userId: String,
+    val name: String,
+    val phoneNumber: String
+)
+
 class AuthRepository(
     private val patientDao: PatientDAO
 ) {
@@ -43,6 +49,11 @@ class AuthRepository(
     ): Boolean {
         val rows = patientDao.registerUser(userId, phone, name, password)
         return rows == 1
+    }
+
+    suspend fun getUserProfile(userId: String): UserProfile? {
+        val patient: Patient? = patientDao.getById(userId)
+        return patient?.let { UserProfile(it.userId, it.name, it.phoneNumber) }
     }
 
 }

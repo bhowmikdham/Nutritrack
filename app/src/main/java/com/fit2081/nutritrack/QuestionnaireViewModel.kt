@@ -97,15 +97,15 @@ class QuestionnaireViewModel(
     fun onPersonaChange(persona: String) = _state.update { it.copy(persona = persona) }
     fun onFoodToggle(key: String, value: Boolean) = _state.update { s ->
         when (key) {
-            "fruits"       -> s.copy(fruits     = value)
+            "fruits"       -> s.copy(fruits = value)
             "vegetables"   -> s.copy(vegetables = value)
-            "grains"       -> s.copy(grains     = value)
-            "red_meat"     -> s.copy(redMeat    = value)
-            "seafood"      -> s.copy(seafood   = value)
-            "poultry"      -> s.copy(poultry   = value)
-            "fish"         -> s.copy(fish      = value)
-            "eggs"         -> s.copy(eggs      = value)
-            "nuts_seeds"   -> s.copy(nutsSeeds = value)
+            "grains"       -> s.copy(grains = value)
+            "redMeat"      -> s.copy(redMeat = value)      // Fixed key
+            "seafood"      -> s.copy(seafood = value)
+            "poultry"      -> s.copy(poultry = value)
+            "fish"         -> s.copy(fish = value)
+            "eggs"         -> s.copy(eggs = value)
+            "nutsSeeds"    -> s.copy(nutsSeeds = value)    // Fixed key
             else           -> s
         }
     }
@@ -116,5 +116,16 @@ class QuestionnaireViewModel(
             "wake_time"         -> s.copy(wakeTime         = time)
             else                -> s
         }
+    }
+}
+class QuestionnaireViewModelFactory(
+    private val repo: IntakeRepository
+) : androidx.lifecycle.ViewModelProvider.Factory {
+    override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(QuestionnaireViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return QuestionnaireViewModel(repo) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

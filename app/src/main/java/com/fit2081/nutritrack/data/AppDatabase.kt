@@ -24,7 +24,7 @@ import com.fit2081.nutritrack.data.DAO.CoachtipsDAO
         Foodintake::class,
         CoachTips::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

@@ -33,23 +33,16 @@ fun HomePage(navController: NavHostController) {
     // 2) Get current user
     val userId = AuthManager.currentUserId() ?: return
 
-    // 3) Stream the PatientHealthRecords
-    val record by phrDao
-        .getByUserId(userId)
-        .filterNotNull()
-        .collectAsState(initial = null)
+    // 3) Stream the list of records, then pull out the first element
+    val recordList by phrDao
+        .getByUserId(userId)            // Flow<List<PatientHealthRecords?>>
+        .filterNotNull()                // Flow<List<PatientHealthRecords>>
+        .collectAsState(initial = emptyList())
 
-    // 4) While loading, show spinner
-    if (record == null) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        return
-    }
+    val rec = recordList.firstOrNull() ?: return
 
-    // 5) Once loaded, fetch userName and pick score by sex
-    val rec = record!!
-    val totalScore = if (rec.sex.equals("Male", true))
+    // 4) Compute the total score based on sex
+    val totalScore = if (rec.sex.equals("Male", ignoreCase = true))
         rec.heifaTotalScoreMale.toInt()
     else
         rec.heifaTotalScoreFemale.toInt()

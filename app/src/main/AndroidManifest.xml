@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.fit2081.nutritrack">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -10,15 +12,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Nutritrack">
         <activity
-            android:name=".Settings"
+            android:name=".ClinicianLogin"
             android:exported="false"
-            android:label="@string/title_activity_settings"
+            android:label="@string/title_activity_clinician_login"
             android:theme="@style/Theme.Nutritrack" />
-        <activity
-            android:name=".Nutricoach"
-            android:exported="false"
-            android:label="@string/title_activity_nutricoach"
-            android:theme="@style/Theme.Nutritrack" /> <!-- Registration screen -->
         <activity
             android:name=".RegisterActivity"
             android:exported="false"
@@ -31,10 +28,6 @@
             android:name=".Questionnaire"
             android:exported="false"
             android:label="@string/title_activity_questionnaire" /> <!-- Dashboard screen -->
-        <activity
-            android:name=".Dashboard"
-            android:exported="false"
-            android:label="@string/title_activity_dashboard" /> <!-- This one is your launcher -->
         <activity
             android:name=".MainActivity"
             android:exported="true"

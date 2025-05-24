@@ -57,7 +57,7 @@ class Questionnaire : ComponentActivity() {
         val vm = QuestionnaireViewModel(intakeRepo)
 
         // ← instead of intent extra, read from AuthManager
-        val patientId = AuthManager.currentUserId() ?: run {
+        val patientId = currentUserId() ?: run {
             startActivity(Intent(this, Login::class.java))
             finish()
             return
@@ -69,7 +69,8 @@ class Questionnaire : ComponentActivity() {
                 QuestionnaireScreen(
                     patientId = patientId,
                     navController = navController,
-                    vm = vm
+                    vm = vm,
+                    onComplete = TODO()
                 )
             }
         }
@@ -83,65 +84,63 @@ class Questionnaire : ComponentActivity() {
 fun QuestionnaireScreen(
     patientId: String,
     navController: NavHostController,
-    vm: QuestionnaireViewModel
+    vm: QuestionnaireViewModel,
+    onComplete:() -> Unit
 ) {
-    val context = LocalContext.current
-    // Load any existing response
-    LaunchedEffect(patientId) { vm.loadResponse(patientId) }
-    val state by vm.state.collectAsState()
+        val context = LocalContext.current
+        LaunchedEffect(patientId) { vm.loadResponse(patientId) }
+        val state by vm.state.collectAsState()
 
-    var showCancel by remember { mutableStateOf(false) }
-    var showInfo by remember { mutableStateOf<Pair<String, Boolean>>("" to false) }
-    var showSummary by remember { mutableStateOf(false) }
+        var showCancel by remember { mutableStateOf(false) }
+        var showInfo by remember { mutableStateOf<Pair<String, Boolean>>("" to false) }
+        var showSummary by remember { mutableStateOf(false) }
 
-    // Discard confirmation
-    if (showCancel) {
-        AlertDialog(
-            onDismissRequest = { showCancel = false },
-            title = { Text("Discard?", fontWeight = FontWeight.Bold) },
-            text = { Text("Lose all changes?") },
-            confirmButton = { TextButton(onClick = { showCancel = false; navController.navigate(Login::class.java)}) { Text("Yes") } },
-            dismissButton = { TextButton(onClick = { showCancel = false }) { Text("No") } }
-        )
-    }
-
-    // Persona info dialog
-    if (showInfo.second) {
-        val (persona, _) = showInfo
-        val imgRes = personaImages[persona] ?: 0
-        val desc = personaDescriptions[persona] ?: ""
-        AlertDialog(
-            onDismissRequest = { showInfo = persona to false },
-            title = { Text(persona, fontWeight = FontWeight.Bold) },
-            text = {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Image(painter = painterResource(id = imgRes), contentDescription = persona, modifier = Modifier.height(160.dp))
-                    Spacer(Modifier.height(8.dp))
-                    Text(desc, textAlign = TextAlign.Center)
-                }
-            },
-            confirmButton = { TextButton(onClick = { showInfo = persona to false }) { Text("OK") } }
-        )
-    }
-    // Summary & submit dialog
-    if (showSummary) {
-        AlertDialog(
-            onDismissRequest = { showSummary = false },
-            title = { Text("Review Your Entries", fontWeight = FontWeight.Bold) },
-            text = { SummaryContent(state) },
-            confirmButton = {
-                TextButton(onClick = {
-                    showSummary = false
-                    vm.saveResponse(patientId)
-                    navController.navigate(Screen.Dashboard.createRoute(patientId)) {
-                        popUpTo(Screen.Welcome.route) { inclusive = true }
+        // Discard confirmation dialog
+        if (showCancel) {
+            AlertDialog(
+                onDismissRequest = { showCancel = false },
+                title = { Text("Discard?", fontWeight = FontWeight.Bold) },
+                text = { Text("Lose all changes?") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showCancel = false
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(Screen.Welcome.route) { inclusive = true }
+                        }
+                    }) {
+                        Text("Yes")
                     }
-                }) { Text("Confirm") }
-            },
-            dismissButton = { TextButton(onClick = { showSummary = false }) { Text("Edit") } }
-        )
-    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showCancel = false }) {
+                        Text("No")
+                    }
+                }
+            )
+        }
 
+        // Summary & submit dialog
+        if (showSummary) {
+            AlertDialog(
+                onDismissRequest = { showSummary = false },
+                title = { Text("Review Your Entries", fontWeight = FontWeight.Bold) },
+                text = { SummaryContent(state) },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showSummary = false
+                        vm.saveResponse(patientId)
+                        onComplete() // Call the completion callback
+                    }) {
+                        Text("Confirm")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showSummary = false }) {
+                        Text("Edit")
+                    }
+                }
+            )
+        }
     // Questionnaire form
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(16.dp),
