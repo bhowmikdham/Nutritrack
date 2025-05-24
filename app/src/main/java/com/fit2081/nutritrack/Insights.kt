@@ -23,10 +23,15 @@ import androidx.navigation.NavHostController
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fit2081.nutritrack.navigation.Screen
 
+/*
+ * Uses callback pattern to navigate to Nutricoach tab since InsightsScreen can't directly
+ * access bottomNavController. Parent component provides navigation logic via callback function.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InsightsScreen(
     navController: NavHostController,
+    onNavigateToNutricoach: (() -> Unit)? = null,
     viewModel: InsightsViewModel = viewModel(
         factory = InsightsViewModelFactory(LocalContext.current)
     )
@@ -138,19 +143,24 @@ fun InsightsScreen(
                             context.startActivity(Intent.createChooser(shareIntent, "Share via"))
                         }
                     ) {
-                        Icon(Icons.Filled.Share, contentDescription = "Share")
+                        Icon(Icons.Filled.Share, contentDescription = "Share",)
                         Spacer(Modifier.width(4.dp))
-                        Text("Share")
+                        Text("Share",color = Color.Black)
                     }
 
-                    // Improve diet button
+                    // Improve diet button with callback pattern
                     Button(
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
-                        onClick = { navController.navigate("NutriCoach") }
+                        onClick = {
+                            onNavigateToNutricoach?.invoke() ?: run {
+                                // Fallback if no callback provided
+                                println("No navigation callback provided")
+                            }
+                        }
                     ) {
-                        Text("Improve My Diet")
+                        Text("Improve My Diet",color= Color.Black)
                     }
                 }
             }

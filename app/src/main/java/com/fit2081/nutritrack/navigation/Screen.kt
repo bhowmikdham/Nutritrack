@@ -204,7 +204,16 @@ fun DashboardWithBottomNav(
                     HomePage(mainNavController)
                 }
                 composable("Insights") {
-                    InsightsScreen(mainNavController)
+                    InsightsScreen(
+                        navController = mainNavController,
+                        onNavigateToNutricoach = {
+                            bottomNavController.navigate("Nutricoach") {
+                                // optional: clear backstack or launch single top
+                                popUpTo("Home") { inclusive = false }
+                                launchSingleTop = true
+                            }
+                        }
+                    )
                 }
                 composable("Nutricoach") {
                     NutricoachScreen(mainNavController)
