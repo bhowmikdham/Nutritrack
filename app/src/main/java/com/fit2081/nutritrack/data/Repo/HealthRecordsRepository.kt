@@ -15,11 +15,5 @@ class HealthRecordsRepository(
     fun allRecords(): Flow<List<PatientHealthRecords?>> =
         dao.getAllRecords()
 
-    /**
-     * Stream any one Float-valued score (e.g., sex not included here—just numeric fields).
-     * Pass in a selector like `it::vegetablesHeifaScoreMale` or a lambda.
-     */
-
-
 }
 

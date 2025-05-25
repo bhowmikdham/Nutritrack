@@ -23,6 +23,12 @@ import com.fit2081.nutritrack.data.AppDatabase
 import com.fit2081.nutritrack.data.Entity.PatientHealthRecords
 import com.fit2081.nutritrack.navigation.Screen
 
+/**
+ * Clinician Dashboard Screen
+ *
+ * Provides administrative interface for healthcare professionals to view
+ * population health statistics, AI-generated insights, and patient data
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClinicianDashboardScreen(
@@ -36,6 +42,12 @@ fun ClinicianDashboardScreen(
 
     val uiState by viewModel.uiState.collectAsState()
 
+    /**
+          Data Loading Effect
+
+          Automatically triggers data loading when screen is first composed
+          Ensures fresh data is available for dashboard display
+     */
     LaunchedEffect(Unit) {
         viewModel.loadData()
     }
@@ -373,6 +385,12 @@ private fun ScoreColumn(
     }
 }
 
+/**
+      AI Insights Card Component
+
+      Integrates with GenAI service to provide intelligent analysis of population health data
+      Allows on-demand generation of insights with loading states and error handling
+ */
 @Composable
 private fun AIInsightsCard(
     uiState: ClinicianDashboardUiState,
@@ -397,6 +415,12 @@ private fun AIInsightsCard(
                     fontWeight = FontWeight.Bold
                 )
 
+                /**
+                      AI Insights Generation Button
+
+                      Triggers AI analysis of current population data
+                      Displays loading state during generation process
+                 */
                 Button(
                     onClick = { viewModel.generateInsights() },
                     enabled = !uiState.isGeneratingInsights,

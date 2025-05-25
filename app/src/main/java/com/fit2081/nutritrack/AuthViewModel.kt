@@ -1,5 +1,4 @@
 package com.fit2081.nutritrack
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fit2081.nutritrack.data.AuthManager
@@ -7,6 +6,13 @@ import com.fit2081.nutritrack.data.Repo.AuthRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
+/**
+ * Authentication ViewModel
+ *
+ * Manages authentication state and login flow for the application
+ * Handles user validation, session persistence, and form state management
+ *
+ */
 class AuthViewModel(
     private val repo: AuthRepository
 ) : ViewModel() {
@@ -44,6 +50,13 @@ class AuthViewModel(
     private val _dropdownExpanded = MutableStateFlow(false)
     val dropdownExpanded: StateFlow<Boolean> = _dropdownExpanded.asStateFlow()
 
+    /**
+     * Initialization Block
+     *
+     * Automatically loads available user IDs from repository on ViewModel creation
+     * Maintains reactive connection to user data changes
+     * help of GenAi was taken
+     */
     init {
         viewModelScope.launch {
             repo.allUserIds.collect { ids ->
@@ -70,11 +83,13 @@ class AuthViewModel(
     }
 
     /**
-     * Kick off the entire login flow in one place:
-     * 1) Does the user exist?
-     * 2) Have they completed registration (name & password)?
-     * 3) Does the password match?
-     * 4) Check food-intake completion.
+     * Comprehensive Login Validation Flow
+     *
+     * Orchestrates the entire authentication process in sequential steps:
+     * 1. User existence verification
+     * 2. Registration completion check
+     * 3. Password authentication
+     * 4. Session establishment
      */
     fun validateAndLogin(userId: String = _selectedUserId.value, password: String = _password.value) {
         viewModelScope.launch {
@@ -109,10 +124,6 @@ class AuthViewModel(
                 AuthManager.signIn(userId)
                 _loginSuccess.value = true
 
-//                // 5) bonus: fetch food-intake completion
-//                val completed = repo.hasFoodIntakeRecords(userId)
-//                _hasCompletedFoodIntake.value = completed
-
             } catch (e: Exception) {
                 _errorMessage.value = e.message ?: "Unknown error"
             } finally {
@@ -121,7 +132,12 @@ class AuthViewModel(
         }
     }
 
-    /** Call this if you ever need to retry or reset the UI state */
+    /**
+       State Reset Functions
+
+       Provides different levels of state clearing for various UI scenarios
+       Allows selective reset of authentication vs form data
+     */
     fun resetLoginState() {
         _isLoading.value = false
         _loginSuccess.value = null

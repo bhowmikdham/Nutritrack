@@ -28,6 +28,13 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.fit2081.nutritrack.navigation.Screen
 
+/**
+     Clinician Login Screen
+
+     Secure authentication interface for healthcare professionals
+     Uses hardcoded passphrase for demonstration purposes
+     In production, this would integrate with proper authentication service
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClinicianLoginScreen(
@@ -41,6 +48,12 @@ fun ClinicianLoginScreen(
 
     val validPassphrase = "dollar-entry-apples"
 
+    /**
+         Clinician Authentication Handler
+
+         Validates passphrase and navigates to dashboard on successful authentication
+         In production, this would integrate with proper authentication service
+     */
     fun handleLogin() {
         isLoading = true
         if (passphrase == validPassphrase) {
@@ -120,7 +133,12 @@ fun ClinicianLoginScreen(
 
             Spacer(Modifier.height(32.dp))
 
-            // Passphrase field
+            /**
+                 Secure Passphrase Input Field
+
+                 Password field with toggle visibility functionality
+                 Includes validation feedback and error states
+             */
             OutlinedTextField(
                 value = passphrase,
                 onValueChange = {
@@ -161,7 +179,12 @@ fun ClinicianLoginScreen(
 
             Spacer(Modifier.height(24.dp))
 
-            // Login button
+            /**
+                 Authentication Action Button
+
+                 Handles login attempt with loading states
+                 Provides visual feedback during authentication process
+             */
             Button(
                 onClick = { handleLogin() },
                 enabled = !isLoading && passphrase.isNotBlank(),

@@ -54,6 +54,13 @@ import com.fit2081.nutritrack.navigation.NavGraph
 import com.fit2081.nutritrack.ui.theme.NutritrackTheme
 import kotlinx.coroutines.withContext
 
+/**
+ * Main Activity - Application Entry Point
+ *
+ * Handles application initialization, database seeding, and navigation setup
+ * Manages user session state and automatic login routing based on user status
+ * Help of Chat Gpt was taken to generate the basis of the and then was adapted
+ */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,7 +79,15 @@ class MainActivity : ComponentActivity() {
                 // Create a single NavController
                 val navController = rememberNavController()
                 val currentUser = AuthManager.currentUserId()
-                // On startup, if logged in, navigate to the correct screen
+
+                /**
+                 * Automatic Navigation Based on User State
+                 *
+                 * Determines appropriate starting screen based on:
+                 * 1. User authentication status (logged in vs logged out)
+                 * 2. Questionnaire completion status (completed vs pending)
+                 * 3. Redirects to appropriate flow automatically on app startup
+                 */
                 LaunchedEffect(currentUser) {
                     if (currentUser != null) {
                         val prefs = getSharedPreferences("prefs_$currentUser", MODE_PRIVATE)
@@ -94,157 +109,184 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-        /**
-         * Seeds Patient and PatientHealthRecords tables if empty by reading accounts.csv from assets
-         */
-        private fun seedDatabaseOnce(db: AppDatabase) {
-            lifecycleScope.launch(Dispatchers.IO) {
-                val patientDao = db.patientDAO()
-                val recordDao = db.patientHealthRecordsDAO()
+    /**
+     * Database Initialization and Seeding System
+     *
+     * Reads comprehensive patient data from CSV file and populates database tables
+     * Only executes once when database is empty to avoid data duplication
+     * Seeds both Patient and PatientHealthRecords tables with extensive health metrics
+     *
+     * Data includes: HEIFA scores, nutrient breakdowns, demographic info, and health indicators
+     */
+    private fun seedDatabaseOnce(db: AppDatabase) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val patientDao = db.patientDAO()
+            val recordDao = db.patientHealthRecordsDAO()
 
-                val count = patientDao.getAllUserIds()
-                if (count.isEmpty()) {
-                    // Read CSV and insert
-                    assets.open("accounts.csv").bufferedReader().useLines { lines ->
-                        lines.drop(1).forEach { line ->
-                            val cols = line.split(",").map { it.trim() }
-                            if (cols.size >= 3) {
-                                val phone = cols[0]
-                                val userId = cols[1]
-                                val sex = cols[2]
-                                // Insert Patient
-                                patientDao.insert(
-                                    com.fit2081.nutritrack.data.Entity.Patient(
-                                        userId = userId,
-                                        phoneNumber = phone,
-                                        password = "",
-                                        name = "",
-                                        sex = sex,
-                                        heifaScore = 0
-                                    )
+            val count = patientDao.getAllUserIds()
+            if (count.isEmpty()) {
+                // Read CSV and insert comprehensive health data
+                assets.open("accounts.csv").bufferedReader().useLines { lines ->
+                    lines.drop(1).forEach { line ->
+                        val cols = line.split(",").map { it.trim() }
+                        if (cols.size >= 3) {
+                            val phone = cols[0]
+                            val userId = cols[1]
+                            val sex = cols[2]
+
+                            // Insert Patient basic profile
+                            patientDao.insert(
+                                Patient(
+                                    userId = userId,
+                                    phoneNumber = phone,
+                                    password = "",
+                                    name = "",
+                                    sex = sex,
+                                    heifaScore = 0
                                 )
-                                // Insert health record with default values or parse further cols as needed
-                                recordDao.insert(
-                                    com.fit2081.nutritrack.data.Entity.PatientHealthRecords(
-                                        userId = userId,
-                                        sex = sex,
-                                        heifaTotalScoreMale = cols.getOrNull(3)?.toFloatOrNull()
-                                            ?: 0f,
-                                        heifaTotalScoreFemale = cols.getOrNull(4)?.toFloatOrNull()
-                                            ?: 0f,
-                                        discretionaryHeifaScoreMale = cols.getOrNull(5)
-                                            ?.toFloatOrNull() ?: 0f,
-                                        discretionaryHeifaScoreFemale = cols.getOrNull(6)
-                                            ?.toFloatOrNull() ?: 0f,
-                                        discretionaryServeSize = cols.getOrNull(7)?.toFloatOrNull()
-                                            ?: 0f,
-                                        vegetablesHeifaScoreMale = cols.getOrNull(8)
-                                            ?.toFloatOrNull() ?: 0f,
-                                        vegetablesHeifaScoreFemale = cols.getOrNull(9)
-                                            ?.toFloatOrNull() ?: 0f,
-                                        vegetablesWithLegumesAllocatedServeSize = cols.getOrNull(10)
-                                            ?.toFloatOrNull() ?: 0f,
-                                        legumesAllocatedVegetables = cols.getOrNull(11)
-                                            ?.toFloatOrNull() ?: 0f,
-                                        vegetablesVariationsScore = cols.getOrNull(12)
-                                            ?.toFloatOrNull() ?: 0f,
-                                        vegetablesCruciferous = cols.getOrNull(13)?.toFloatOrNull()
-                                            ?: 0f,
-                                        vegetablesTuberAndBulb = cols.getOrNull(14)?.toFloatOrNull()
-                                            ?: 0f,
-                                        vegetablesOther = cols.getOrNull(15)?.toFloatOrNull() ?: 0f,
-                                        legumes = cols.getOrNull(16)?.toFloatOrNull() ?: 0f,
-                                        vegetablesGreen = cols.getOrNull(17)?.toFloatOrNull() ?: 0f,
-                                        vegetablesRedAndOrange = cols.getOrNull(18)?.toFloatOrNull()
-                                            ?: 0f,
-                                        fruitHeifaScoreMale = cols.getOrNull(19)?.toFloatOrNull()
-                                            ?: 0f,
-                                        fruitHeifaScoreFemale = cols.getOrNull(20)?.toFloatOrNull()
-                                            ?: 0f,
-                                        fruitServeSize = cols.getOrNull(21)?.toFloatOrNull() ?: 0f,
-                                        fruitVariationsScore = cols.getOrNull(22)?.toFloatOrNull()
-                                            ?: 0f,
-                                        fruitPome = cols.getOrNull(23)?.toFloatOrNull() ?: 0f,
-                                        fruitTropicalAndSubtropical = cols.getOrNull(24)
-                                            ?.toFloatOrNull() ?: 0f,
-                                        fruitBerry = cols.getOrNull(25)?.toFloatOrNull() ?: 0f,
-                                        fruitStone = cols.getOrNull(26)?.toFloatOrNull() ?: 0f,
-                                        fruitCitrus = cols.getOrNull(27)?.toFloatOrNull() ?: 0f,
-                                        fruitOther = cols.getOrNull(28)?.toFloatOrNull() ?: 0f,
-                                        grainsAndCerealsHeifaScoreMale = cols.getOrNull(29)
-                                            ?.toFloatOrNull() ?: 0f,
-                                        grainsAndCerealsHeifaScoreFemale = cols.getOrNull(30)
-                                            ?.toFloatOrNull() ?: 0f,
-                                        grainsAndCerealsServeSize = cols.getOrNull(31)
-                                            ?.toFloatOrNull() ?: 0f,
-                                        grainsAndCerealsNonWholeGrains = cols.getOrNull(32)
-                                            ?.toFloatOrNull() ?: 0f,
-                                        wholeGrainsHeifaScoreMale = cols.getOrNull(33)
-                                            ?.toFloatOrNull() ?: 0f,
-                                        wholeGrainsHeifaScoreFemale = cols.getOrNull(34)
-                                            ?.toFloatOrNull() ?: 0f,
-                                        wholeGrainsServeSize = cols.getOrNull(35)?.toFloatOrNull()
-                                            ?: 0f,
-                                        meatAndAlternativesHeifaScoreMale = cols.getOrNull(36)
-                                            ?.toFloatOrNull() ?: 0f,
-                                        meatAndAlternativesHeifaScoreFemale = cols.getOrNull(37)
-                                            ?.toFloatOrNull() ?: 0f,
-                                        meatAndAlternativesWithLegumesAllocatedServeSize = cols.getOrNull(
-                                            38
-                                        )?.toFloatOrNull() ?: 0f,
-                                        legumesAllocatedMeatAndAlternatives = cols.getOrNull(39)
-                                            ?.toFloatOrNull() ?: 0f,
-                                        dairyAndAlternativesHeifaScoreMale = cols.getOrNull(40)
-                                            ?.toFloatOrNull() ?: 0f,
-                                        dairyAndAlternativesHeifaScoreFemale = cols.getOrNull(41)
-                                            ?.toFloatOrNull() ?: 0f,
-                                        dairyAndAlternativesServeSize = cols.getOrNull(42)
-                                            ?.toFloatOrNull() ?: 0f,
-                                        sodiumHeifaScoreMale = cols.getOrNull(43)?.toFloatOrNull()
-                                            ?: 0f,
-                                        sodiumHeifaScoreFemale = cols.getOrNull(44)?.toFloatOrNull()
-                                            ?: 0f,
-                                        sodiumMgMilligrams = cols.getOrNull(45)?.toFloatOrNull()
-                                            ?: 0f,
-                                        alcoholHeifaScoreMale = cols.getOrNull(46)?.toFloatOrNull()
-                                            ?: 0f,
-                                        alcoholHeifaScoreFemale = cols.getOrNull(47)
-                                            ?.toFloatOrNull() ?: 0f,
-                                        alcoholStandardDrinks = cols.getOrNull(48)?.toFloatOrNull()
-                                            ?: 0f,
-                                        waterHeifaScoreMale = cols.getOrNull(49)?.toFloatOrNull()
-                                            ?: 0f,
-                                        waterHeifaScoreFemale = cols.getOrNull(50)?.toFloatOrNull()
-                                            ?: 0f,
-                                        water = cols.getOrNull(51)?.toFloatOrNull() ?: 0f,
-                                        waterTotalMl = cols.getOrNull(52)?.toFloatOrNull() ?: 0f,
-                                        beverageTotalMl = cols.getOrNull(53)?.toFloatOrNull() ?: 0f,
-                                        sugarHeifaScoreMale = cols.getOrNull(54)?.toFloatOrNull()
-                                            ?: 0f,
-                                        sugarHeifaScoreFemale = cols.getOrNull(55)?.toFloatOrNull()
-                                            ?: 0f,
-                                        sugar = cols.getOrNull(56)?.toFloatOrNull() ?: 0f,
-                                        saturatedFatHeifaScoreMale = cols.getOrNull(57)
-                                            ?.toFloatOrNull() ?: 0f,
-                                        saturatedFatHeifaScoreFemale = cols.getOrNull(58)
-                                            ?.toFloatOrNull() ?: 0f,
-                                        saturatedFat = cols.getOrNull(59)?.toFloatOrNull() ?: 0f,
-                                        unsaturatedFatHeifaScoreMale = cols.getOrNull(60)
-                                            ?.toFloatOrNull() ?: 0f,
-                                        unsaturatedFatHeifaScoreFemale = cols.getOrNull(61)
-                                            ?.toFloatOrNull() ?: 0f,
-                                        unsaturatedFatServeSize = cols.getOrNull(62)
-                                            ?.toFloatOrNull() ?: 0f
-                                    )
+                            )
+
+                            /**
+                             * Comprehensive Health Records Insertion
+                             *
+                             * Seeds database with extensive nutrition and health metrics including:
+                             * - HEIFA total scores (gender-specific)
+                             * - Discretionary food scores and serving sizes
+                             * - Detailed vegetable categories and variations
+                             * - Fruit categories and nutritional breakdowns
+                             * - Grain and cereal consumption patterns
+                             * - Meat and dairy alternative tracking
+                             * - Sodium, alcohol, water, and sugar monitoring
+                             * - Saturated and unsaturated fat analysis
+                             */
+                            recordDao.insert(
+                                com.fit2081.nutritrack.data.Entity.PatientHealthRecords(
+                                    userId = userId,
+                                    sex = sex,
+                                    heifaTotalScoreMale = cols.getOrNull(3)?.toFloatOrNull()
+                                        ?: 0f,
+                                    heifaTotalScoreFemale = cols.getOrNull(4)?.toFloatOrNull()
+                                        ?: 0f,
+                                    discretionaryHeifaScoreMale = cols.getOrNull(5)
+                                        ?.toFloatOrNull() ?: 0f,
+                                    discretionaryHeifaScoreFemale = cols.getOrNull(6)
+                                        ?.toFloatOrNull() ?: 0f,
+                                    discretionaryServeSize = cols.getOrNull(7)?.toFloatOrNull()
+                                        ?: 0f,
+                                    vegetablesHeifaScoreMale = cols.getOrNull(8)
+                                        ?.toFloatOrNull() ?: 0f,
+                                    vegetablesHeifaScoreFemale = cols.getOrNull(9)
+                                        ?.toFloatOrNull() ?: 0f,
+                                    vegetablesWithLegumesAllocatedServeSize = cols.getOrNull(10)
+                                        ?.toFloatOrNull() ?: 0f,
+                                    legumesAllocatedVegetables = cols.getOrNull(11)
+                                        ?.toFloatOrNull() ?: 0f,
+                                    vegetablesVariationsScore = cols.getOrNull(12)
+                                        ?.toFloatOrNull() ?: 0f,
+                                    vegetablesCruciferous = cols.getOrNull(13)?.toFloatOrNull()
+                                        ?: 0f,
+                                    vegetablesTuberAndBulb = cols.getOrNull(14)?.toFloatOrNull()
+                                        ?: 0f,
+                                    vegetablesOther = cols.getOrNull(15)?.toFloatOrNull() ?: 0f,
+                                    legumes = cols.getOrNull(16)?.toFloatOrNull() ?: 0f,
+                                    vegetablesGreen = cols.getOrNull(17)?.toFloatOrNull() ?: 0f,
+                                    vegetablesRedAndOrange = cols.getOrNull(18)?.toFloatOrNull()
+                                        ?: 0f,
+                                    fruitHeifaScoreMale = cols.getOrNull(19)?.toFloatOrNull()
+                                        ?: 0f,
+                                    fruitHeifaScoreFemale = cols.getOrNull(20)?.toFloatOrNull()
+                                        ?: 0f,
+                                    fruitServeSize = cols.getOrNull(21)?.toFloatOrNull() ?: 0f,
+                                    fruitVariationsScore = cols.getOrNull(22)?.toFloatOrNull()
+                                        ?: 0f,
+                                    fruitPome = cols.getOrNull(23)?.toFloatOrNull() ?: 0f,
+                                    fruitTropicalAndSubtropical = cols.getOrNull(24)
+                                        ?.toFloatOrNull() ?: 0f,
+                                    fruitBerry = cols.getOrNull(25)?.toFloatOrNull() ?: 0f,
+                                    fruitStone = cols.getOrNull(26)?.toFloatOrNull() ?: 0f,
+                                    fruitCitrus = cols.getOrNull(27)?.toFloatOrNull() ?: 0f,
+                                    fruitOther = cols.getOrNull(28)?.toFloatOrNull() ?: 0f,
+                                    grainsAndCerealsHeifaScoreMale = cols.getOrNull(29)
+                                        ?.toFloatOrNull() ?: 0f,
+                                    grainsAndCerealsHeifaScoreFemale = cols.getOrNull(30)
+                                        ?.toFloatOrNull() ?: 0f,
+                                    grainsAndCerealsServeSize = cols.getOrNull(31)
+                                        ?.toFloatOrNull() ?: 0f,
+                                    grainsAndCerealsNonWholeGrains = cols.getOrNull(32)
+                                        ?.toFloatOrNull() ?: 0f,
+                                    wholeGrainsHeifaScoreMale = cols.getOrNull(33)
+                                        ?.toFloatOrNull() ?: 0f,
+                                    wholeGrainsHeifaScoreFemale = cols.getOrNull(34)
+                                        ?.toFloatOrNull() ?: 0f,
+                                    wholeGrainsServeSize = cols.getOrNull(35)?.toFloatOrNull()
+                                        ?: 0f,
+                                    meatAndAlternativesHeifaScoreMale = cols.getOrNull(36)
+                                        ?.toFloatOrNull() ?: 0f,
+                                    meatAndAlternativesHeifaScoreFemale = cols.getOrNull(37)
+                                        ?.toFloatOrNull() ?: 0f,
+                                    meatAndAlternativesWithLegumesAllocatedServeSize = cols.getOrNull(
+                                        38
+                                    )?.toFloatOrNull() ?: 0f,
+                                    legumesAllocatedMeatAndAlternatives = cols.getOrNull(39)
+                                        ?.toFloatOrNull() ?: 0f,
+                                    dairyAndAlternativesHeifaScoreMale = cols.getOrNull(40)
+                                        ?.toFloatOrNull() ?: 0f,
+                                    dairyAndAlternativesHeifaScoreFemale = cols.getOrNull(41)
+                                        ?.toFloatOrNull() ?: 0f,
+                                    dairyAndAlternativesServeSize = cols.getOrNull(42)
+                                        ?.toFloatOrNull() ?: 0f,
+                                    sodiumHeifaScoreMale = cols.getOrNull(43)?.toFloatOrNull()
+                                        ?: 0f,
+                                    sodiumHeifaScoreFemale = cols.getOrNull(44)?.toFloatOrNull()
+                                        ?: 0f,
+                                    sodiumMgMilligrams = cols.getOrNull(45)?.toFloatOrNull()
+                                        ?: 0f,
+                                    alcoholHeifaScoreMale = cols.getOrNull(46)?.toFloatOrNull()
+                                        ?: 0f,
+                                    alcoholHeifaScoreFemale = cols.getOrNull(47)
+                                        ?.toFloatOrNull() ?: 0f,
+                                    alcoholStandardDrinks = cols.getOrNull(48)?.toFloatOrNull()
+                                        ?: 0f,
+                                    waterHeifaScoreMale = cols.getOrNull(49)?.toFloatOrNull()
+                                        ?: 0f,
+                                    waterHeifaScoreFemale = cols.getOrNull(50)?.toFloatOrNull()
+                                        ?: 0f,
+                                    water = cols.getOrNull(51)?.toFloatOrNull() ?: 0f,
+                                    waterTotalMl = cols.getOrNull(52)?.toFloatOrNull() ?: 0f,
+                                    beverageTotalMl = cols.getOrNull(53)?.toFloatOrNull() ?: 0f,
+                                    sugarHeifaScoreMale = cols.getOrNull(54)?.toFloatOrNull()
+                                        ?: 0f,
+                                    sugarHeifaScoreFemale = cols.getOrNull(55)?.toFloatOrNull()
+                                        ?: 0f,
+                                    sugar = cols.getOrNull(56)?.toFloatOrNull() ?: 0f,
+                                    saturatedFatHeifaScoreMale = cols.getOrNull(57)
+                                        ?.toFloatOrNull() ?: 0f,
+                                    saturatedFatHeifaScoreFemale = cols.getOrNull(58)
+                                        ?.toFloatOrNull() ?: 0f,
+                                    saturatedFat = cols.getOrNull(59)?.toFloatOrNull() ?: 0f,
+                                    unsaturatedFatHeifaScoreMale = cols.getOrNull(60)
+                                        ?.toFloatOrNull() ?: 0f,
+                                    unsaturatedFatHeifaScoreFemale = cols.getOrNull(61)
+                                        ?.toFloatOrNull() ?: 0f,
+                                    unsaturatedFatServeSize = cols.getOrNull(62)
+                                        ?.toFloatOrNull() ?: 0f
                                 )
-                            }
+                            )
                         }
                     }
                 }
             }
         }
     }
+}
 
+/**
+ * Welcome Screen - Application Landing Page
+ *
+ * Displays app disclaimer, branding, and primary navigation entry point
+ * Provides legal information and contact details for professional consultation
+ * Serves as the initial user touchpoint with important legal disclaimers
+ */
 @Composable
 fun WelcomeScreen(
     navController: NavHostController,
@@ -271,12 +313,21 @@ fun WelcomeScreen(
                 contentScale = ContentScale.Crop
             )
             Spacer(modifier = Modifier.height(24.dp))
+
+            /**
+             * Legal Disclaimer and Medical Advice Warning
+             *
+             * Important legal text informing users that the app is educational only
+             * Directs users to seek professional medical advice for health decisions
+             * Includes contact information for Accredited Practicing Dietitians
+             * Essential for liability protection and user safety
+             */
             Text(
                 text = "This app provides general health and nutrition information for educational purposes only. It is not intended as " +
                         "medical advice, diagnosis, or treatment. Always consult a qualified healthcare professional " +
                         "before making any changes to your diet, exercise, or health regimen. " +
                         "Use this app at your own risk. " +
-                        "If you’d like to an Accredited Practicing Dietitian (APD), please visit:",
+                        "If you'd like to an Accredited Practicing Dietitian (APD), please visit:",
                 color = Color.Black,
                 textAlign = TextAlign.Center,
                 fontSize = 12.sp
@@ -287,6 +338,14 @@ fun WelcomeScreen(
                 color = Color.Black
             )
             Spacer(modifier = Modifier.height(40.dp))
+
+            /**
+             * Primary Navigation Button
+             *
+             * Main entry point to the application login flow
+             * Styled with app's primary color scheme for brand consistency
+             * Provides clear call-to-action for user engagement
+             */
             Button(
                 shape = RoundedCornerShape(20.dp),
                 modifier = Modifier
@@ -308,6 +367,13 @@ fun WelcomeScreen(
     }
 }
 
+/**
+ * Utility Function - Questionnaire Completion Check
+ *
+ * Placeholder function for checking questionnaire completion status
+ * In production, this would read from SharedPreferences or database
+ * Used for determining user flow and navigation logic
+ */
 fun isQuestionnaireDone(userId: String): Boolean {
     // TODO: read shared preferences or DB flag
     return false

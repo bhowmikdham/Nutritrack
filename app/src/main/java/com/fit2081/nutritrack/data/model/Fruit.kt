@@ -2,7 +2,7 @@ package com.fit2081.nutritrack.data.model
 
 import com.google.gson.annotations.SerializedName
 import java.io.Serializable
-
+//Credit:https://howtodoinjava.com/gson/gson-serializedname/\
 data class Fruit(
     @SerializedName("name") val name: String,
     @SerializedName("id") val id: Int,

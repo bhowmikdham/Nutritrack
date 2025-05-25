@@ -27,6 +27,15 @@ enum class ForgotPasswordStep {
     SUCCESS             // Password reset successful
 }
 
+/**
+      Forgot Password ViewModel
+
+      Manages the multi-step password reset flow with comprehensive validation
+      Handles user verification, password validation, and state management
+      Implements secure identity verification before allowing password changes
+      CREDIT: GIVEN TO GEN AI (CHAT GPT) FOR HELPING IN THE CODE FORMATION IN THIS FILE
+
+ */
 class ForgotPasswordViewModel(
     private val authRepository: AuthRepository
 ) : ViewModel() {
@@ -38,6 +47,12 @@ class ForgotPasswordViewModel(
     private val _userIds = MutableStateFlow<List<String>>(emptyList())
     val userIds: StateFlow<List<String>> = _userIds.asStateFlow()
 
+    /**
+          Initialization and User ID Loading
+
+          Automatically loads available user IDs from repository for dropdown selection
+          Maintains reactive connection to user data changes
+     */
     init {
         viewModelScope.launch {
             authRepository.allUserIds.collect { ids ->
@@ -82,6 +97,16 @@ class ForgotPasswordViewModel(
         }
     }
 
+    /**
+          User Details Verification Process
+
+          Comprehensive validation process that performs multi-layered security checks:
+          1. User existence verification in the system
+          2. Phone number registration status validation
+          3. Correlation verification between user ID and phone number
+
+          Only proceeds to password reset if all verification steps pass
+     */
     fun verifyUserDetails() {
         val currentState = _uiState.value
 
@@ -156,6 +181,14 @@ class ForgotPasswordViewModel(
         }
     }
 
+    /**
+          Password Reset Implementation
+
+          Validates new password criteria and executes password update with security checks:
+          - Password length requirements (minimum 6 characters)
+          - Password confirmation matching
+          - Secure update through repository layer
+     */
     fun resetPassword() {
         val currentState = _uiState.value
 
@@ -215,6 +248,12 @@ class ForgotPasswordViewModel(
         }
     }
 
+    /**
+          Navigation and State Management
+
+          Provides step navigation and state reset functionality
+          Allows users to go back in the flow and clear temporary states
+     */
     fun goToNextStep() {
         when (_uiState.value.step) {
             ForgotPasswordStep.ENTER_DETAILS -> verifyUserDetails()
@@ -252,6 +291,12 @@ class ForgotPasswordViewModel(
     }
 }
 
+/**
+      ViewModel Factory for Dependency Injection
+
+      Provides proper dependency injection for ForgotPasswordViewModel
+      Ensures ViewModel receives required AuthRepository for user operations
+ */
 class ForgotPasswordViewModelFactory(
     private val authRepository: AuthRepository
 ) : ViewModelProvider.Factory {

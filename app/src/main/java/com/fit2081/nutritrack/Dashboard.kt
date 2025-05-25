@@ -27,14 +27,14 @@ fun HomePage(navController: NavHostController) {
 
     // 1) Manual DI: DAOs and Repos
     val db       = remember { AppDatabase.getDatabase(context) }
-    val phrDao   = remember { db.patientHealthRecordsDAO() }
+    val patientHealthDao   = remember { db.patientHealthRecordsDAO() }
     val authRepo = remember { AuthRepository(db.patientDAO()) }
 
     // 2) Get current user
     val userId = AuthManager.currentUserId() ?: return
 
     // 3) Stream the list of records, then pull out the first element
-    val recordList by phrDao
+    val recordList by patientHealthDao
         .getByUserId(userId)            // Flow<List<PatientHealthRecords?>>
         .filterNotNull()                // Flow<List<PatientHealthRecords>>
         .collectAsState(initial = emptyList())

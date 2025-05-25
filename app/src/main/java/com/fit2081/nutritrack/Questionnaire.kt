@@ -48,32 +48,19 @@ import androidx.compose.runtime.getValue
 import com.fit2081.nutritrack.data.AuthManager.currentUserId
 import com.fit2081.nutritrack.data.AuthManager
 
-/*
- * ===== MATERIAL ICONS MAPPING =====
+/**
+ * Material Icons Mapping for Food Categories
  *
- * Food categories are represented using Material Design Icons:
- * Source: https://fonts.google.com/icons
- * Compose Implementation: https://developer.android.com/reference/kotlin/androidx/compose/material/icons/package-summary
- *
- * Icon Mappings:
- * - Vegetables: Icons.Filled.Grass (representing plant-based foods)
- * - Red Meat: Icons.Filled.Restaurant (representing cooked meals/meat)
- * - Fish: Icons.Filled.Sailing (maritime/water connection as requested)
- * - Fruits: Icons.Filled.Apple (direct fruit representation)
- * - Seafood: Icons.Filled.WaterDrop (water/ocean connection)
- * - Eggs: Icons.Filled.Circle (oval/egg shape representation)
- * - Grains: Icons.Filled.Grain (direct grain representation)
- * - Poultry: Icons.Filled.Pets (representing birds/animals)
- * - Nuts & Seeds: Icons.Filled.Nature (natural/organic foods)
- *
- * All icons follow Material Design guidelines for consistent visual language.
+ * Implementation taken from Material Design Guidelines and adapted for NutriTrack
+ * Help of ChatGPT for production of certain code was taken
+ * Maps food categories to appropriate Material Design Icons for consistent UI
  */
 
 /**
- * Enhanced Persona selection section with expandable animated cards
- * Incorporates Week 11 size animation concepts with spring physics
- * Source: Course Week 11 Animation examples - animateDpAsState with spring
- * Adaptation: Applied to persona cards with expand/collapse functionality
+ * Enhanced Persona Selection with Animation
+ *
+ * Animation implementation adapted from Course Week 11 examples
+ * Uses spring physics for smooth expand/collapse animations on persona cards
  */
 @Composable
 fun AnimatedPersonaSelectionSection(
@@ -130,9 +117,14 @@ fun AnimatedPersonaSelectionSection(
 }
 
 /**
- * Individual animated persona card with expandable description
- * Demonstrates size animation using animateContentSize and spring physics
- * Adapted from Week 11 SizeAnimationDemo example
+ * Animated Persona Card with Size Animation
+ *
+ * Implementation adapted from Week 11 SizeAnimationDemo
+ * Demonstrates smooth size transitions using spring physics for card expansion
+ * credit to:
+ * https://developer.android.com/develop/ui/compose/animation/quick-guide
+ * https://medium.com/@acceldia/jetpack-compose-creating-expandable-cards-with-content-9ea1eae09efe
+ * Help of Chat Gpt was taken for figuring out the approach & code for certain following parts
  */
 @Composable
 private fun AnimatedPersonaCard(
@@ -317,7 +309,13 @@ data class EnhancedPersonaInfo(
     val fullDescription: String
 )
 
-// Enhanced persona data with Material Icons and detailed descriptions
+/**
+ * Persona Data Configuration
+ *
+ * Static data defining the 6 personality types for eating habits
+ * Uses Material Design Icons for consistent visual representation
+ *
+ */
 private val enhancedPersonaList = listOf(
     EnhancedPersonaInfo(
         name = "Health Devotee",
@@ -358,21 +356,28 @@ private val enhancedPersonaList = listOf(
 )
 
 /**
- * Activity hosting the Questionnaire flow.
- * Following Android's Activity lifecycle best practices:
- * Source: https://developer.android.com/guide/components/activities/activity-lifecycle
+ * Main Questionnaire Activity
+ *
+ * Implements Android Activity lifecycle and Material 3 design patterns
+ * Handles user authentication and navigation flow for the questionnaire process
+ * credit : https://medium.com/androiddevelopers/dependency-injection-in-compose-a2db897e6f11
  */
 class Questionnaire : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Manual DI following Android Architecture Guidelines:
-        // Source: https://developer.android.com/topic/architecture
+        // Manual DI following Android Architecture
         val db = AppDatabase.getDatabase(this)
         val intakeRepo = IntakeRepository(db.foodIntakeDAO())
         val vm = QuestionnaireViewModel(intakeRepo)
 
+        /**
+         * User Authentication Check
+         *
+         * Verifies current user session before proceeding with questionnaire
+         * Redirects to login if no valid user session found
+         */
         val patientId = currentUserId() ?: run {
             startActivity(Intent(this, Login::class.java))
             finish()
@@ -399,8 +404,11 @@ class Questionnaire : ComponentActivity() {
 }
 
 /**
- * Modern Material 3 Questionnaire UI following Material Design guidelines:
- * Source: https://m3.material.io/components
+ * Main Questionnaire Screen Composable
+ *
+ * Depicts the entire questionnaire flow with Material 3 design
+ * Manages state collection and dialog presentations for user interactions
+ *
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -410,6 +418,7 @@ fun QuestionnaireScreen(
     vm: QuestionnaireViewModel,
     onComplete: () -> Unit
 ) {
+    //use of chat GPT was taken to adapt to the state management
     val context = LocalContext.current
     LaunchedEffect(patientId) { vm.loadResponse(patientId) }
     val state by vm.state.collectAsState()
@@ -417,8 +426,12 @@ fun QuestionnaireScreen(
     var showCancel by remember { mutableStateOf(false) }
     var showSummary by remember { mutableStateOf(false) }
 
-    // Discard confirmation dialog - Material 3 AlertDialog
-    // Source: https://m3.material.io/components/dialogs/overview
+    /**
+     * Discard Changes Alert Dialog
+     *
+     * Material 3 AlertDialog implementation for confirming questionnaire abandonment
+     * Provides user with clear options to either discard changes or continue editing
+     */
     if (showCancel) {
         AlertDialog(
             onDismissRequest = { showCancel = false },
@@ -442,7 +455,12 @@ fun QuestionnaireScreen(
         )
     }
 
-    // Summary dialog
+    /**
+     * Summary Review Dialog
+     *
+     * Final review step before submitting questionnaire data
+     * Allows user to review all selections and either confirm or go back to edit
+     */
     if (showSummary) {
         AlertDialog(
             onDismissRequest = { showSummary = false },
@@ -466,11 +484,8 @@ fun QuestionnaireScreen(
     }
 
     // Main content with Material 3 styling
-    // Source: https://m3.material.io/foundations/layout/understanding-layout/overview
     Scaffold(
         topBar = {
-            // TopAppBar implementation from Material 3 documentation
-            // Source: https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#TopAppBar(kotlin.Function0,androidx.compose.ui.Modifier,kotlin.Function0,kotlin.Function1,androidx.compose.foundation.layout.WindowInsets,androidx.compose.material3.TopAppBarColors,androidx.compose.material3.TopAppBarScrollBehavior)
             TopAppBar(
                 title = { Text("Food Intake Questionnaire", fontWeight = FontWeight.Medium) },
                 navigationIcon = {
@@ -487,6 +502,11 @@ fun QuestionnaireScreen(
         },
         containerColor = Color(0xFFF8F5F5)
     ) { paddingValues ->
+        /**
+         *
+         * Main implementation of everything in the Questionnaire
+         */
+        //help of GenAi was taken to incorporate LazyColumns, Help of LAB material showcasing LazyColumns was also taken to ensure a proper implementation
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -516,11 +536,6 @@ fun QuestionnaireScreen(
     }
 }
 
-/**
- * Instructions card using Material 3 Card component
- * Source: https://m3.material.io/components/cards/overview
- * Implementation: https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#Card(kotlin.Function0,androidx.compose.ui.Modifier,kotlin.Function0,androidx.compose.ui.graphics.Shape,androidx.compose.material3.CardColors,androidx.compose.material3.CardElevation,androidx.compose.foundation.BorderStroke,androidx.compose.foundation.interaction.MutableInteractionSource)
- */
 @Composable
 private fun InstructionsCard() {
     Card(
@@ -542,10 +557,11 @@ private fun InstructionsCard() {
 }
 
 /**
- * Food categories section with improved card-based layout
- * Using Material 3 FilterChip for better interaction:
- * Source: https://m3.material.io/components/chips/overview
- * FilterChip Documentation: https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#FilterChip(kotlin.Boolean,kotlin.Function1,kotlin.Function0,androidx.compose.ui.Modifier,kotlin.Boolean,kotlin.Function0,kotlin.Function0,androidx.compose.ui.graphics.Shape,androidx.compose.material3.SelectableChipColors,androidx.compose.material3.SelectableChipElevation,androidx.compose.foundation.BorderStroke,androidx.compose.foundation.interaction.MutableInteractionSource)
+ * Food Categories Selection Section
+ *
+ * Implements Material 3 design for food category selection
+ * Uses grid layout with visual feedback for selected categories
+ * Credit :
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -605,10 +621,11 @@ private fun FoodCategoriesSection(
 }
 
 /**
- * Individual food category item with Material 3 styling
- * Using Box composable for custom selection indicators:
- * Source: https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/package-summary#Box(androidx.compose.ui.Modifier,androidx.compose.ui.Alignment,kotlin.Boolean,kotlin.Function1)
- * Background styling: https://developer.android.com/reference/kotlin/androidx/compose/foundation/package-summary#background(androidx.compose.ui.Modifier,androidx.compose.ui.graphics.Brush,androidx.compose.ui.graphics.Shape,kotlin.Float)
+ *
+ *
+ * Implementaiton of the following was Generated Using GenAi by Prompt engineering and providing the approach to the problem ,
+ * further adapted by physical coding.
+ *
  */
 @Composable
 private fun FoodCategoryItem(
@@ -674,107 +691,99 @@ private fun FoodCategoryItem(
     }
 }
 
-/**
- * Persona selection section using Material 3 components
- * LazyRow implementation for horizontal scrolling:
- * Source: https://developer.android.com/reference/kotlin/androidx/compose/foundation/lazy/package-summary#LazyRow(androidx.compose.ui.Modifier,androidx.compose.foundation.lazy.LazyListState,androidx.compose.foundation.layout.PaddingValues,kotlin.Boolean,androidx.compose.foundation.layout.Arrangement.Horizontal,androidx.compose.ui.Alignment.Vertical,androidx.compose.foundation.gestures.FlingBehavior,kotlin.Boolean,kotlin.Function1)
- */
-@Composable
-private fun PersonaSelectionSection(
-    selectedPersona: String,
-    onPersonaChange: (String) -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = "Your Persona",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-
-            Text(
-                text = "People can be broadly classified into 6 different types based on their eating performance. Click on each picture below to find out the different types, and select the type that best fits you",
-                fontSize = 12.sp,
-                color = Color.Gray,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(personaList) { persona ->
-                    PersonaCard(
-                        persona = persona,
-                        isSelected = selectedPersona == persona.name,
-                        onSelect = { onPersonaChange(persona.name) }
-                    )
-                }
-            }
-        }
-    }
-}
-
-/**
- * Individual persona card component
- * Card with BorderStroke for selection indication:
- * Source: https://developer.android.com/reference/kotlin/androidx/compose/foundation/BorderStroke
- */
-@Composable
-private fun PersonaCard(
-    persona: PersonaInfo,
-    isSelected: Boolean,
-    onSelect: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .width(120.dp)
-            .clickable { onSelect() },
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) Color(0xFFC1FF72) else Color(0xFFF5F5F5)
-        ),
-        border = if (isSelected) {
-            BorderStroke(2.dp, Color(0xFF137A44))
-        } else null,
-        elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 4.dp else 2.dp)
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(12.dp)
-        ) {
-            Image(
-                painter = painterResource(id = persona.imageRes),
-                contentDescription = persona.name,
-                modifier = Modifier
-                    .size(60.dp)
-                    .clip(CircleShape)
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = persona.name,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Medium,
-                textAlign = TextAlign.Center,
-                color = if (isSelected) Color(0xFF137A44) else Color.Black
-            )
-        }
-    }
-}
+//OLD APPROACH
+//private fun PersonaSelectionSection(
+//    selectedPersona: String,
+//    onPersonaChange: (String) -> Unit
+//) {
+//    Card(
+//        modifier = Modifier.fillMaxWidth(),
+//        colors = CardDefaults.cardColors(containerColor = Color.White),
+//        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+//    ) {
+//        Column(
+//            modifier = Modifier.padding(16.dp)
+//        ) {
+//            Text(
+//                text = "Your Persona",
+//                fontSize = 18.sp,
+//                fontWeight = FontWeight.Bold,
+//                modifier = Modifier.padding(bottom = 8.dp)
+//            )
+//
+//            Text(
+//                text = "People can be broadly classified into 6 different types based on their eating performance. Click on each picture below to find out the different types, and select the type that best fits you",
+//                fontSize = 12.sp,
+//                color = Color.Gray,
+//                modifier = Modifier.padding(bottom = 16.dp)
+//            )
+//
+//            LazyRow(
+//                horizontalArrangement = Arrangement.spacedBy(12.dp)
+//            ) {
+//                items(personaList) { persona ->
+//                    PersonaCard(
+//                        persona = persona,
+//                        isSelected = selectedPersona == persona.name,
+//                        onSelect = { onPersonaChange(persona.name) }
+//                    )
+//                }
+//            }
+//        }
+//    }
+//}
+//
+//
+//private fun PersonaCard(
+//    persona: PersonaInfo,
+//    isSelected: Boolean,
+//    onSelect: () -> Unit
+//) {
+//    Card(
+//        modifier = Modifier
+//            .width(120.dp)
+//            .clickable { onSelect() },
+//        colors = CardDefaults.cardColors(
+//            containerColor = if (isSelected) Color(0xFFC1FF72) else Color(0xFFF5F5F5)
+//        ),
+//        border = if (isSelected) {
+//            BorderStroke(2.dp, Color(0xFF137A44))
+//        } else null,
+//        elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 4.dp else 2.dp)
+//    ) {
+//        Column(
+//            horizontalAlignment = Alignment.CenterHorizontally,
+//            modifier = Modifier.padding(12.dp)
+//        ) {
+//            Image(
+//                painter = painterResource(id = persona.imageRes),
+//                contentDescription = persona.name,
+//                modifier = Modifier
+//                    .size(60.dp)
+//                    .clip(CircleShape)
+//            )
+//
+//            Spacer(modifier = Modifier.height(8.dp))
+//
+//            Text(
+//                text = persona.name,
+//                fontSize = 11.sp,
+//                fontWeight = FontWeight.Medium,
+//                textAlign = TextAlign.Center,
+//                color = if (isSelected) Color(0xFF137A44) else Color.Black
+//            )
+//        }
+//    }
+//}
 
 /**
- * Timing section using Material 3 OutlinedCard and time display with validation
- * Following Material Design time picker guidelines:
- * Source: https://m3.material.io/components/time-pickers/overview
- * OutlinedCard Documentation: https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#OutlinedCard
- * Validation: Custom time validation logic for meal and sleep scheduling
+ * Timing Configuration Section
+ *
+ * Implements time picker dialogs with comprehensive validation
+ * Provides real-time feedback for time conflicts and validation rules
+ *
+ *These define the rules that are needed for a proper time picking
+ * Help of GenAi was taken for figuring out the approach
  */
 @Composable
 private fun TimingSection(
@@ -854,7 +863,12 @@ private fun TimingSection(
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
-            // Show validation error if any
+            /**
+             * Real-time Validation Feedback
+             *
+             * Displays validation errors or success messages based on current time configuration
+             * Provides immediate feedback to help users understand and correct time conflicts
+             */
             if (!validationResult.isValid && validationResult.errorMessage != null) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -913,10 +927,10 @@ private fun TimingSection(
 }
 
 /**
- * Time picker row component with error state support
- * TimePickerDialog from Android framework:
- * Source: https://developer.android.com/reference/android/app/TimePickerDialog
- * Error handling: Visual feedback for validation errors
+ * Time Picker Row Component
+ *
+ * Individual time selection component with Android TimePickerDialog integration
+ * Provides visual error states and clear time display with picker functionality
  */
 @Composable
 private fun TimePickerRow(
@@ -927,13 +941,18 @@ private fun TimePickerRow(
 ) {
     val calendar = Calendar.getInstance()
 
+    /**
+     * Time Picker Dialog Handler
+     *
+     * Launches Android's native TimePickerDialog when user taps on time field
+     * Handles time formatting and callback to parent component
+     * Taken from A1 , and modified it a bit to adapt the current file
+     */
     fun showTimePicker() {
         val parts = field.value.split(':')
         val hour = parts.getOrNull(0)?.toIntOrNull() ?: calendar.get(Calendar.HOUR_OF_DAY)
         val minute = parts.getOrNull(1)?.toIntOrNull() ?: calendar.get(Calendar.MINUTE)
 
-        // TimePickerDialog usage following Android documentation
-        // Source: https://developer.android.com/reference/android/app/TimePickerDialog#TimePickerDialog(android.content.Context,%20android.app.TimePickerDialog.OnTimeSetListener,%20int,%20int,%20boolean)
         TimePickerDialog(
             context,
             { _, h, m -> onTimeSelected("%02d:%02d".format(h, m)) },
@@ -942,7 +961,7 @@ private fun TimePickerRow(
             true
         ).show()
     }
-
+   // taken from Gen AI
     OutlinedCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -1014,11 +1033,11 @@ private fun TimePickerRow(
 }
 
 /**
- * Continue button with Material 3 styling and enhanced validation
- * Button component following Material 3 guidelines:
- * Source: https://m3.material.io/components/buttons/overview
- * Implementation: https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#Button
- * Validation: Comprehensive form and time validation with user feedback
+ * Continue Button with Comprehensive Validation
+ *
+ * Handles form submission with multiple validation checks
+ * Provides specific error messages for different validation failures
+ * When validation passes, shows summary dialog for final review
  */
 @Composable
 private fun ContinueButton(
@@ -1116,7 +1135,6 @@ private fun SummaryContent(state: FoodintakeState) {
 }
 
 // Data classes for better organization following Kotlin best practices
-// Source: https://kotlinlang.org/docs/data-classes.html
 data class FoodCategory(
     val key: String,
     val label: String,
@@ -1135,9 +1153,8 @@ data class TimeField(
     val label: String,
     val value: String
 )
-
-// Static data organization following Kotlin conventions
-// Source: https://kotlinlang.org/docs/object-declarations.html#object-declarations-overview
+/**
+// Pictures Mapped to the Pictures ,we are not using it right now but we can actually implement this by just removing the animation cards and folllowing the old approach
 private val personaList = listOf(
     PersonaInfo("Health Devotee", R.drawable.persona_1, "I'm passionate about healthy eating"),
     PersonaInfo("Mindful Eater", R.drawable.persona_2, "Mindful eating helps you focus"),
@@ -1146,7 +1163,14 @@ private val personaList = listOf(
     PersonaInfo("Health Procrastinator", R.drawable.persona_5, "I'm contemplating healthy eating"),
     PersonaInfo("Food Carefree", R.drawable.persona_6, "I'm not bothered about healthy eating")
 )
+**/
 
+/**
+ * Form Validation Logic
+ *
+ * Comprehensive validation function that checks all required form fields
+ * Ensures at least one food category is selected, persona is chosen, and all times are valid
+ */
 private fun isFormValid(state: FoodintakeState): Boolean {
     val anyFood = listOf(
         state.fruits, state.vegetables, state.grains,
@@ -1168,15 +1192,24 @@ private fun isFormValid(state: FoodintakeState): Boolean {
 }
 
 /**
- * Comprehensive time validation function
- * Source: Custom validation logic following Android input validation best practices
- * Reference: https://developer.android.com/guide/topics/ui/controls/text#InputValidation
+ * Time Validation System
+ *
+ * Custom validation logic for time constraints in the questionnaire
+ * Implements business rules for meal timing, sleep duration, and conflict detection
  */
 data class TimeValidationResult(
     val isValid: Boolean,
     val errorMessage: String? = null
 )
 
+/**
+ * Main Time Validation Function
+ *
+ * Validates time inputs according to business rules:
+ * 1. All times must be different
+ * 2. Sleep duration must be at least 4 hours
+ * 3. Meal time cannot occur during sleep hours
+ */
 private fun validateTimes(
     biggestMealTime: String,
     sleepTime: String,
@@ -1216,8 +1249,13 @@ private fun validateTimes(
 }
 
 /**
- * Convert HH:MM time string to minutes since midnight
+ * Time Utility Functions
+ *
+ * Helper functions for time calculations and validations
+ * Handles conversion between time formats and business logic calculations
  */
+
+// Converting HH:MM time string to minutes since midnight
 private fun timeToMinutes(time: String): Int {
     val parts = time.split(":")
     val hours = parts[0].toInt()
@@ -1225,22 +1263,19 @@ private fun timeToMinutes(time: String): Int {
     return hours * 60 + minutes
 }
 
-/**
- * Calculate sleep duration considering overnight sleep
- */
+// Calculate sleep duration considering overnight sleep
 private fun calculateSleepDuration(sleepMinutes: Int, wakeMinutes: Int): Int {
     return if (wakeMinutes > sleepMinutes) {
-        // Same day sleep (unusual but possible)
+        //We need ot make sure of two cases here
+        // Same day sleep
         wakeMinutes - sleepMinutes
     } else {
-        // Overnight sleep (normal case)
+        // Overnight sleep
         (24 * 60 - sleepMinutes) + wakeMinutes
     }
 }
 
-/**
- * Check if meal time falls during sleep period
- */
+// Check if meal time falls during sleep period
 private fun isTimeDuringSleep(mealMinutes: Int, sleepMinutes: Int, wakeMinutes: Int): Boolean {
     return if (wakeMinutes > sleepMinutes) {
         // Same day sleep - meal should not be between sleep and wake
@@ -1250,53 +1285,3 @@ private fun isTimeDuringSleep(mealMinutes: Int, sleepMinutes: Int, wakeMinutes: 
         mealMinutes > sleepMinutes || mealMinutes < wakeMinutes
     }
 }
-
-/*
- * ===== DOCUMENTATION AND SOURCES =====
- *
- * This implementation follows official Android and Material Design guidelines.
- * All code references are from official documentation:
- *
- * 1. Android Developer Documentation:
- *    - Activity Lifecycle: https://developer.android.com/guide/components/activities/activity-lifecycle
- *    - Architecture Components: https://developer.android.com/topic/architecture
- *    - Compose UI: https://developer.android.com/jetpack/compose
- *    - Accessibility: https://developer.android.com/guide/topics/ui/accessibility
- *
- * 2. Material Design 3 (Material You):
- *    - Design System: https://m3.material.io/
- *    - Components: https://m3.material.io/components
- *    - Cards: https://m3.material.io/components/cards/overview
- *    - Buttons: https://m3.material.io/components/buttons/overview
- *    - Dialogs: https://m3.material.io/components/dialogs/overview
- *    - Chips: https://m3.material.io/components/chips/overview
- *    - Time Pickers: https://m3.material.io/components/time-pickers/overview
- *    - Layout Guidelines: https://m3.material.io/foundations/layout/understanding-layout/overview
- *
- * 3. Jetpack Compose Documentation:
- *    - TopAppBar: https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#TopAppBar
- *    - Card: https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#Card
- *    - OutlinedCard: https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#OutlinedCard
- *    - Button: https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#Button
- *    - LazyRow: https://developer.android.com/reference/kotlin/androidx/compose/foundation/lazy/package-summary#LazyRow
- *    - LazyColumn: https://developer.android.com/reference/kotlin/androidx/compose/foundation/lazy/package-summary#LazyColumn
- *    - Box: https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/package-summary#Box
- *    - Background Modifier: https://developer.android.com/reference/kotlin/androidx/compose/foundation/package-summary#background
- *    - BorderStroke: https://developer.android.com/reference/kotlin/androidx/compose/foundation/BorderStroke
- *
- * 4. Android Framework:
- *    - TimePickerDialog: https://developer.android.com/reference/android/app/TimePickerDialog
- *    - Calendar: https://developer.android.com/reference/java/util/Calendar
- *
- * 5. Kotlin Language Features:
- *    - Data Classes: https://kotlinlang.org/docs/data-classes.html
- *    - Object Declarations: https://kotlinlang.org/docs/object-declarations.html
- *    - Collections: https://kotlinlang.org/docs/collections-overview.html
- *
- * All implementation patterns follow:
- * - Material Design 3 specifications for visual design
- * - Android Architecture Guidelines for code structure
- * - Jetpack Compose best practices for UI development
- * - MVVM pattern for data handling
- * - Accessibility guidelines for inclusive design
- */

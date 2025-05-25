@@ -30,6 +30,12 @@ import com.fit2081.nutritrack.data.AppDatabase
 import com.fit2081.nutritrack.data.Repo.AuthRepository
 import com.fit2081.nutritrack.navigation.Screen
 
+/**
+    Forgot Password Screen with Multi-Step Flow
+
+    Implements a secure password reset process with user verification
+    Features step-by-step UI with progress indicators and comprehensive validation
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ForgotPasswordScreen(
@@ -46,7 +52,12 @@ fun ForgotPasswordScreen(
     val uiState by viewModel.uiState.collectAsState()
     val userIds by viewModel.userIds.collectAsState()
 
-    // Navigation handling
+    /**
+        Auto-Navigation on Success
+
+        Automatically redirects to login screen after successful password reset
+        Provides user feedback during the transition period with countdown
+     */
     LaunchedEffect(uiState.resetSuccess) {
         if (uiState.resetSuccess) {
             // Auto-navigate to login after a delay
@@ -131,7 +142,12 @@ fun ForgotPasswordScreen(
 
             Spacer(Modifier.height(24.dp))
 
-            // Content based on current step
+            /**
+                Dynamic Content Based on Current Step
+
+                Renders appropriate UI content for each step of the password reset process
+                Maintains state consistency across step transitions
+             */
             when (uiState.step) {
                 ForgotPasswordStep.ENTER_DETAILS -> {
                     EnterDetailsContent(
@@ -155,6 +171,12 @@ fun ForgotPasswordScreen(
     }
 }
 
+/**
+   Progress Step Indicator Component
+
+   Visual progress indicator showing current step in the password reset flow
+   Uses color coding to indicate completed, active, and pending steps
+ */
 @Composable
 private fun StepIndicator(currentStep: ForgotPasswordStep) {
     Row(
@@ -202,6 +224,13 @@ private fun StepDot(isActive: Boolean, isCompleted: Boolean) {
     )
 }
 
+/**
+   User Details Verification Step
+
+   Collects and validates user ID and phone number for identity verification
+   Uses dropdown for user ID selection and phone number input validation
+   Implements comprehensive security checks before allowing password reset
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EnterDetailsContent(
@@ -293,7 +322,14 @@ private fun EnterDetailsContent(
 
         Spacer(Modifier.height(24.dp))
 
-        // Verify button
+        /**
+           Identity Verification Button
+
+           Triggers the verification process that checks:
+           - User existence in system
+           - Phone number registration
+           - Correlation between user ID and phone number
+         */
         Button(
             onClick = { viewModel.verifyUserDetails() },
             enabled = !uiState.isLoading && uiState.userId.isNotBlank() && uiState.phoneNumber.isNotBlank(),
@@ -327,6 +363,12 @@ private fun EnterDetailsContent(
     }
 }
 
+/**
+   New Password Creation Step
+
+   Secure password creation interface with confirmation validation
+   Includes password requirements display and real-time validation feedback
+ */
 @Composable
 private fun SetNewPasswordContent(
     uiState: ForgotPasswordUiState,
@@ -403,7 +445,12 @@ private fun SetNewPasswordContent(
 
         Spacer(Modifier.height(8.dp))
 
-        // Password requirements
+        /**
+           Password Requirements Display
+
+           Informational card showing password security requirements
+           Helps users understand validation criteria before submission
+         */
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5)),
@@ -460,6 +507,12 @@ private fun SetNewPasswordContent(
     }
 }
 
+/**
+    Success Confirmation Screen
+
+    Final step displaying successful password reset confirmation
+    Provides navigation options and automatic redirect countdown
+ */
 @Composable
 private fun SuccessContent(navController: NavHostController) {
     Column(

@@ -19,6 +19,42 @@ import com.fit2081.nutritrack.data.AppDatabase
 import com.fit2081.nutritrack.data.Repo.AuthRepository
 import com.fit2081.nutritrack.navigation.Screen
 
+/**
+     Settings Screen Implementation
+
+     Comprehensive user settings and account management interface
+     Provides user profile information display and account actions
+     Implements secure logout functionality and navigation management
+
+     Core Features:
+     - User profile information display
+     - Secure logout with proper session cleanup
+     - Navigation to clinician login interface
+     - Real-time profile data updates
+     - Error handling and loading states
+
+     Security Features:
+     - Authenticated access only
+     - Secure session management
+     - Proper logout with complete state cleanup
+     - Navigation security for unauthorized access
+
+     UI Components:
+     - Material 3 design system implementation
+     - Responsive layout with proper spacing
+     - Loading states and error handling
+     - Accessible design with proper semantics
+
+     Architecture Pattern:
+     - MVVM with reactive state management
+     - Repository pattern for data access
+     - Dependency injection through manual DI
+     - Proper lifecycle management
+
+     Credit: Implementation follows Android Architecture Components guidelines
+     Reference: https://developer.android.com/topic/architecture
+    CREDIT: GIVEN TO GEN AI (CHAT GPT) FOR HELPING IN THE CODE FORMATION IN THIS FILE
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -27,6 +63,20 @@ fun SettingsScreen(
 ) {
     val context = LocalContext.current
 
+    /**
+         Dependency Injection Setup
+
+         Manual dependency injection using remember for proper lifecycle management
+         Database instance cached to prevent unnecessary recreations
+         Repository provides abstracted access to authentication data
+         ViewModel factory ensures proper dependency injection
+
+         DI Benefits:
+         - Testability through interface abstraction
+         - Consistent data access patterns
+         - Proper lifecycle management
+         - Memory efficiency through caching
+     */
     // Setup ViewModel with proper DI
     val db = remember { AppDatabase.getDatabase(context) }
     val authRepo = remember { AuthRepository(db.patientDAO()) }
@@ -36,6 +86,20 @@ fun SettingsScreen(
 
     val uiState by viewModel.uiState.collectAsState()
 
+    /**
+         Navigation Side Effect Management
+
+         LaunchedEffect handles navigation as side effect
+         Prevents navigation during active composition
+         Ensures proper back stack management
+         Clears entire navigation stack on logout
+
+         Navigation Security:
+         - Redirects unauthorized users to welcome screen
+         - Clears sensitive data from navigation stack
+         - Prevents back navigation to authenticated screens
+         - Maintains proper app flow state
+     */
     // Handle logout navigation
     LaunchedEffect(uiState.isLoggedIn) {
         if (!uiState.isLoggedIn && !uiState.isLoading) {
@@ -45,6 +109,14 @@ fun SettingsScreen(
         }
     }
 
+    /**
+         Error Handling Side Effects
+
+         Automatic error clearing for better user experience
+         LaunchedEffect ensures error handling doesn't interfere with composition
+         Could be extended to show snackbars or other error UI
+         Provides clean error state management
+     */
     // Handle errors
     uiState.error?.let { error ->
         LaunchedEffect(error) {
@@ -54,6 +126,20 @@ fun SettingsScreen(
         }
     }
 
+    /**
+         Main Settings Scaffold Structure
+
+         Material 3 Scaffold provides consistent app structure
+         TopAppBar with refresh functionality for data updates
+         Proper content padding management through innerPadding
+         Clean white background for professional appearance
+
+         Scaffold Benefits:
+         - Consistent Material Design structure
+         - Automatic layout management
+         - Built-in support for floating action buttons
+         - Proper coordinate system for animations
+     */
     Scaffold(
         topBar = {
             TopAppBar(
@@ -71,6 +157,14 @@ fun SettingsScreen(
         containerColor = Color.White
     ) { innerPadding ->
 
+        /**
+             Loading State Management
+
+             Centered loading indicator during data fetching
+             Proper loading state prevents showing incomplete data
+             Material 3 CircularProgressIndicator for consistency
+             Full-screen loading overlay for clear user feedback
+         */
         if (uiState.isLoading) {
             Box(
                 modifier = Modifier
@@ -81,6 +175,14 @@ fun SettingsScreen(
                 CircularProgressIndicator()
             }
         } else if (!uiState.isLoggedIn) {
+            /**
+                 Unauthorized Access Handling
+
+                 Clear messaging for unauthenticated users
+                 Prevents showing sensitive settings data
+                 Graceful handling of session expiration
+                 User-friendly messaging for login requirement
+             */
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -93,12 +195,28 @@ fun SettingsScreen(
                 )
             }
         } else {
+            /**
+                 Main Settings Content Layout
+
+                 Organized settings interface with clear sections
+                 Proper spacing and visual hierarchy
+                 Consistent padding and margin management
+                 Responsive layout for different screen sizes
+             */
             Column(
                 modifier = modifier
                     .fillMaxSize()
                     .padding(innerPadding)
                     .padding(16.dp)
             ) {
+                /**
+                     Account Section Header
+
+                     Clear section labeling with Material Design typography
+                     Gray color for secondary importance
+                     Consistent styling across section headers
+                     Proper spacing for visual separation
+                 */
                 // ACCOUNT HEADER
                 Text(
                     "ACCOUNT",
@@ -108,6 +226,20 @@ fun SettingsScreen(
                 )
                 Spacer(Modifier.height(16.dp))
 
+                /**
+                     User Information Display Card
+
+                     Comprehensive user profile information display
+                     Material 3 Card component for consistent styling
+                     Organized information rows with icons and labels
+                     Fallback text for missing information
+
+                     Information Categories:
+                     - Personal name for identification
+                     - Phone number for contact information
+                     - User ID for system identification
+                     - Proper fallback messaging for missing data
+                    */
                 // User Info Card
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -141,6 +273,14 @@ fun SettingsScreen(
 
                 Spacer(Modifier.height(32.dp))
 
+                /**
+                     Additional Settings Section
+
+                     Secondary settings options with clear labeling
+                     Consistent styling with account section
+                     Proper visual hierarchy and spacing
+                     Future-extensible design for additional options
+                 */
                 // OTHER SETTINGS HEADER
                 Text(
                     "OTHER SETTINGS",
@@ -150,6 +290,14 @@ fun SettingsScreen(
                 )
                 Spacer(Modifier.height(16.dp))
 
+                /**
+                     Logout Functionality
+
+                     Secure logout with proper session cleanup
+                     Clear visual identification with logout icon
+                     ViewModel-handled logout logic for security
+                     Proper state management during logout process
+                 */
                 // Logout Button
                 SettingsCard(
                     icon = Icons.Default.Logout,
@@ -159,6 +307,14 @@ fun SettingsScreen(
 
                 Spacer(Modifier.height(8.dp))
 
+                /**
+                     Clinician Access Portal
+
+                     Navigation to clinician login interface
+                     Administrative access for healthcare providers
+                     Secure navigation to privileged functionality
+                     Clear visual identification with admin icon
+                 */
                 // Clinician Login Button
                 SettingsCard(
                     icon = Icons.Default.AdminPanelSettings,
@@ -170,6 +326,29 @@ fun SettingsScreen(
     }
 }
 
+/**
+     User Information Row Component
+
+     Reusable component for displaying user profile information
+     Consistent layout and styling across different information types
+     Icon-based visual identification for each data category
+     Proper typography hierarchy for labels and values
+
+     Design Pattern:
+     - Icon for visual identification
+     - Label for field description
+     - Value for actual user data
+     - Consistent spacing and alignment
+
+     Accessibility Features:
+     - Icon content descriptions for screen readers
+     - Proper text contrast for readability
+     - Clear visual hierarchy through typography
+     - Adequate touch targets for interaction
+
+     Credit: Component design follows Material Design guidelines
+     Reference: https://m3.material.io/components/cards/overview
+ */
 @Composable
 private fun UserInfoRow(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
@@ -202,6 +381,36 @@ private fun UserInfoRow(
     }
 }
 
+/**
+     Settings Action Card Component
+
+     Interactive card component for settings actions
+     Material 3 Card with click handling for user interactions
+     Consistent styling with chevron indicator for navigation
+     Icon-based visual identification for each action
+
+     Component Features:
+     - Material 3 Card styling for consistency
+     - Click handling for action execution
+     - Icon identification for action type
+     - Chevron indicator for navigation feedback
+     - Proper spacing and touch targets
+
+     Interaction Design:
+     - Clear visual feedback on interaction
+     - Consistent spacing and alignment
+     - Professional appearance with rounded corners
+     - Accessible design with proper semantics
+
+     Use Cases:
+     - Logout functionality
+     - Navigation to other screens
+     - Action execution with confirmation
+     - Settings toggles and preferences
+
+     Credit: Interactive card design follows Material Design guidelines
+     Reference: https://m3.material.io/components/cards/overview
+ */
 @Composable
 private fun SettingsCard(
     icon: androidx.compose.ui.graphics.vector.ImageVector,

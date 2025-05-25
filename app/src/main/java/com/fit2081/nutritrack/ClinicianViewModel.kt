@@ -28,6 +28,12 @@ data class ClinicianDashboardUiState(
     val error: String? = null
 )
 
+/**
+    Clinician Dashboard ViewModel
+
+    Manages patient health data aggregation and AI insight generation
+    Processes health records for population-level analytics and reporting
+ */
 class ClinicianDashboardViewModel(
     context: Context
 ) : ViewModel() {
@@ -41,6 +47,12 @@ class ClinicianDashboardViewModel(
     private val _uiState = MutableStateFlow(ClinicianDashboardUiState())
     val uiState: StateFlow<ClinicianDashboardUiState> = _uiState.asStateFlow()
 
+    /**
+        Data Loading and Processing
+
+        Loads all patient health records and processes them for dashboard display
+        Calculates population statistics, gender distributions, and health metrics
+     */
     fun loadData() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
@@ -74,6 +86,14 @@ class ClinicianDashboardViewModel(
         loadData()
     }
 
+    /**
+        Health Records Processing Engine
+
+        Calculates comprehensive health statistics from patient data including:
+        - Gender-specific score averages (male vs female HEIFA scores)
+        - Health status distribution (healthy/at-risk/unhealthy categories)
+        - Population demographics and overall health metrics
+     */
     private fun processRecords(records: List<PatientHealthRecords>) {
         val maleRecords = records.filter { it.sex.equals("Male", ignoreCase = true) }
         val femaleRecords = records.filter { it.sex.equals("Female", ignoreCase = true) }
@@ -118,6 +138,16 @@ class ClinicianDashboardViewModel(
         }
     }
 
+    /**
+        AI Insights Generation System
+
+        Integrates with GenAI service to generate intelligent analysis of population health data
+        Creates detailed context from current dashboard statistics including:
+        - Population demographics and distributions
+        - Health status percentages and trends
+        - Gender-specific health patterns
+        - Risk assessment and intervention recommendations
+     */
     fun generateInsights() {
         viewModelScope.launch {
             _uiState.update {
@@ -179,6 +209,12 @@ class ClinicianDashboardViewModel(
     }
 }
 
+/**
+    ViewModel Factory for Dependency Injection
+
+    Provides proper dependency injection for ClinicianDashboardViewModel
+    Ensures ViewModel receives required Context for database operations
+ */
 class ClinicianDashboardViewModelFactory(
     private val context: Context
 ) : ViewModelProvider.Factory {

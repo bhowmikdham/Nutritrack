@@ -1,4 +1,4 @@
-// Updated InsightsScreen with LazyColumn and aligned progress bars
+// Updated InsightsScreen with Card-based UI
 package com.fit2081.nutritrack
 
 import android.content.Intent
@@ -19,13 +19,17 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.ui.draw.clip
 import androidx.navigation.NavHostController
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fit2081.nutritrack.navigation.Screen
 
-/*
- * Uses callback pattern to navigate to Nutricoach tab since InsightsScreen can't directly
- * access bottomNavController. Parent component provides navigation logic via callback function.
+/**
+   Insights Screen - Nutrition Score Display
+
+   Displays user's comprehensive nutrition scores with visual progress indicators
+   Provides sharing functionality and navigation to improvement recommendations
+   Uses callback pattern for navigation to maintain separation of concerns
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,7 +43,12 @@ fun InsightsScreen(
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
-    // Handle not logged in error
+    /**
+       Authentication State Handling
+
+       Redirects to login if user is not authenticated
+       Ensures secure access to personal nutrition data
+     */
     uiState.error?.let {
         LaunchedEffect(Unit) {
             navController.navigate("login") { popUpTo(0) }
@@ -58,83 +67,116 @@ fun InsightsScreen(
         return
     }
 
-    // Display scores using LazyColumn
+    // Display scores using LazyColumn with cards
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Insights", fontWeight = FontWeight.ExtraBold, fontSize = 20.sp) },
-                colors = centerAlignedTopAppBarColors(containerColor = Color(0xFFC1FF72))
-            )
-        },
-        containerColor = Color.White
+        containerColor = Color(0xFFF5F5F5)
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp)
                 .fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             // Title
             item {
                 Text(
                     "Your Nutrient Scores",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 30.sp,
-                    modifier = Modifier.padding(vertical = 8.dp)
+                    fontSize = 28.sp,
+                    modifier = Modifier.padding(bottom = 8.dp)
                 )
             }
 
-            // Nutrient scores
+            // Nutrient score cards
             items(uiState.nutrients) { nutrient ->
-                NutrientScoreRow(nutrient)
+                NutrientScoreCard(nutrient)
             }
 
-            // Total score section
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    "Total Food Quality Score",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
-                )
-            }
+            /**
+               Total Score Summary Card
 
+               Displays overall nutrition score with prominent visual design
+               Provides at-a-glance health assessment for the user
+               Uses large typography and progress indicators for impact
+             */
             item {
-                Row(
+                Card(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFFC1FF72).copy(alpha = 0.3f)
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
-                    LinearProgressIndicator(
-                        progress = uiState.totalScore / 100f,
+                    Column(
                         modifier = Modifier
-                            .weight(1f)
-                            .height(8.dp),
-                        color = Color(0xFF137A44),
-                        trackColor = Color(0xFFD7E6D6)
-                    )
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Text(
-                        "${uiState.totalScore}/100",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium
-                    )
+                            .fillMaxWidth()
+                            .padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text(
+                            "Total Food Quality Score",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp,
+                            color = Color(0xFF137A44)
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                "${uiState.totalScore}",
+                                fontSize = 48.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF137A44)
+                            )
+                            Text(
+                                "/ 100",
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = Color(0xFF137A44).copy(alpha = 0.7f)
+                            )
+                        }
+
+                        LinearProgressIndicator(
+                            progress = uiState.totalScore / 100f,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(12.dp)
+                                .clip(RoundedCornerShape(6.dp)),
+                            color = Color(0xFF137A44),
+                            trackColor = Color(0xFFD7E6D6)
+                        )
+                    }
                 }
             }
 
-            // Buttons section
+            /**
+               Action Buttons Section
+
+               Provides sharing functionality and navigation to nutrition coaching
+               Uses callback pattern for navigation to maintain separation of concerns
+               Sharing integrates with Android's native sharing capabilities
+              */
             item {
-                Spacer(modifier = Modifier.height(16.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // Share button
+                    /**
+                       Share Button Implementation
+
+                       Creates Android share intent with nutrition score data
+                       Allows users to share their progress across platforms
+                     */
                     Button(
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF137A44)),
+                        contentPadding = PaddingValues(vertical = 16.dp),
                         onClick = {
                             val shareIntent = Intent(ACTION_SEND).apply {
                                 type = "text/plain"
@@ -143,75 +185,122 @@ fun InsightsScreen(
                             context.startActivity(Intent.createChooser(shareIntent, "Share via"))
                         }
                     ) {
-                        Icon(Icons.Filled.Share, contentDescription = "Share",)
-                        Spacer(Modifier.width(4.dp))
-                        Text("Share",color = Color.Black)
+                        Icon(
+                            Icons.Filled.Share,
+                            contentDescription = "Share",
+                            tint = Color.White
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text("Share", color = Color.White, fontWeight = FontWeight.Medium)
                     }
 
-                    // Improve diet button with callback pattern
+                    /**
+                       Nutrition Coaching Navigation
+
+                       Uses callback pattern to navigate to coaching features
+                       Maintains loose coupling between components
+                     */
                     Button(
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72)),
+                        contentPadding = PaddingValues(vertical = 16.dp),
                         onClick = {
                             onNavigateToNutricoach?.invoke() ?: run {
-                                // Fallback if no callback provided
                                 println("No navigation callback provided")
                             }
                         }
                     ) {
-                        Text("Improve My Diet",color= Color.Black)
+                        Text(
+                            "Improve My Diet",
+                            color = Color(0xFF137A44),
+                            fontWeight = FontWeight.Medium
+                        )
                     }
                 }
             }
 
-            // Add some bottom padding
+            // Bottom spacing
             item {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }
 }
 
-@Composable
-private fun NutrientScoreRow(nutrient: NutrientUiModel) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Label (fixed width for alignment)
-        Text(
-            text = nutrient.label,
-            fontSize = 14.sp,
-            modifier = Modifier.width(140.dp)
-        )
+/**
+   Individual Nutrient Score Card
 
-        // Progress bar and score (aligned to the right)
-        Row(
-            modifier = Modifier.weight(1f),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically
+   Displays individual nutrient scores with progress visualization
+   Uses color coding to indicate performance levels (good/warning/poor)
+   Provides detailed breakdown of specific nutrient achievements
+  */
+@Composable
+private fun NutrientScoreCard(nutrient: NutrientUiModel) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // Header row with nutrient name and score
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = nutrient.label,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color(0xFF333333)
+                )
+
+                Text(
+                    text = "${nutrient.score.toInt()}/${nutrient.maxScore.toInt()}",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = getColorForScore(nutrient.score, nutrient.maxScore)
+                )
+            }
+
+            // Progress bar
             LinearProgressIndicator(
                 progress = nutrient.score / nutrient.maxScore,
                 modifier = Modifier
-                    .width(150.dp)
-                    .height(12.dp),
+                    .fillMaxWidth()
+                    .height(8.dp)
+                    .clip(RoundedCornerShape(4.dp)),
                 color = getColorForScore(nutrient.score, nutrient.maxScore),
-                trackColor = Color(0xFFD7E6D6)
+                trackColor = Color(0xFFE0E0E0)
             )
-            Spacer(modifier = Modifier.width(8.dp))
+
+            // Optional: Add percentage text
             Text(
-                text = "${nutrient.score.toInt()}/${nutrient.maxScore.toInt()}",
+                text = "${((nutrient.score / nutrient.maxScore) * 100).toInt()}%",
                 fontSize = 12.sp,
-                modifier = Modifier.width(35.dp),
-                fontWeight = FontWeight.Medium
+                color = Color(0xFF666666),
+                modifier = Modifier.align(Alignment.End)
             )
         }
     }
 }
 
+/**
+ Score Color Calculation
+   Determines appropriate color for nutrient scores based on performance thresholds
+   Provides visual feedback for health assessment using traffic light system:
+   - Green (80%+): Excellent nutrition performance
+   - Yellow (50-79%): Moderate performance, room for improvement
+   - Red (<50%): Poor performance, needs attention
+
+ */
 @Composable
 private fun getColorForScore(score: Float, maxScore: Float): Color {
     val percentage = (score / maxScore) * 100

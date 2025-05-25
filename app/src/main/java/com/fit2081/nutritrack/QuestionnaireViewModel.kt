@@ -11,6 +11,10 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/**
+ This is the data class representing the state of the food intake questionnaire.
+ Credit : Given to Gen AI for helping in the implementation of this and the Week 9/8/10 Lab content
+ */
 // ... FoodintakeState class unchanged ...
 data class FoodintakeState(
     val fruits: Boolean = false,
@@ -118,6 +122,7 @@ class QuestionnaireViewModel(
         }
     }
 }
+//help taken from GenAI for this implementation
 class QuestionnaireViewModelFactory(
     private val repo: IntakeRepository
 ) : androidx.lifecycle.ViewModelProvider.Factory {

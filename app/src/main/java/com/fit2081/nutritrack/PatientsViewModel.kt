@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 
 /**
  * Represents a single nutrient score for display.
+ * CREDIT: GIVEN TO GEN AI (CHAT GPT) IN HELPING FOR ADAPTATION OF THIS FILE AND IMPLEMENTATION OF CERTAIN CODE SNIPPETS
  */
 data class NutrientUiModel(
     val label: String,
@@ -152,6 +153,7 @@ class InsightsViewModel(context: Context) : ViewModel() {
 
 /**
  * Factory to create InsightsViewModel with Context.
+ * HELP FROM GENAI WAS TAKEN FOR PRODUCTION OF THIS
  */
 class InsightsViewModelFactory(
     private val context: Context
