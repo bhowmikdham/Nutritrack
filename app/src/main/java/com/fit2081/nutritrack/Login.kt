@@ -9,6 +9,7 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -18,7 +19,6 @@ import androidx.compose.material3.*
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -94,11 +94,11 @@ fun LoginScreenSimple(
     val errorMessage by vm.errorMessage.collectAsState()
     val notRegistered by vm.isNotRegistered.collectAsState()
 
-    // Local form state
-    var dropdownExpanded by rememberSaveable { mutableStateOf(false) }
-    var selectedId by rememberSaveable { mutableStateOf("") }
-    var passwordText by rememberSaveable { mutableStateOf("") }
-    var showPassword by rememberSaveable { mutableStateOf(false) }
+    // Form state from ViewModel
+    val selectedId by vm.selectedUserId.collectAsState()
+    val passwordText by vm.password.collectAsState()
+    val showPassword by vm.showPassword.collectAsState()
+    val dropdownExpanded by vm.dropdownExpanded.collectAsState()
 
     // Navigate on success
     LaunchedEffect(loginSuccess) {
@@ -116,11 +116,11 @@ fun LoginScreenSimple(
         selectedId = selectedId,
         passwordText = passwordText,
         showPassword = showPassword,
-        onDropdownExpandedChange = { dropdownExpanded = it },
-        onSelectedIdChange = { selectedId = it },
-        onPasswordTextChange = { passwordText = it },
-        onShowPasswordChange = { showPassword = it },
-        onLogin = { vm.validateAndLogin(selectedId, passwordText) },
+        onDropdownExpandedChange = vm::updateDropdownExpanded,
+        onSelectedIdChange = vm::updateSelectedUserId,
+        onPasswordTextChange = vm::updatePassword,
+        onShowPasswordChange = vm::updateShowPassword,
+        onLogin = { vm.validateAndLogin() },
         onRegister = onRegister,
         onForgotPassword = onForgotPassword
     )
@@ -142,11 +142,11 @@ fun LoginScreen(
     val errorMessage by vm.errorMessage.collectAsState()
     val notRegistered by vm.isNotRegistered.collectAsState()
 
-    // Local form state
-    var dropdownExpanded by rememberSaveable { mutableStateOf(false) }
-    var selectedId by rememberSaveable { mutableStateOf("") }
-    var passwordText by rememberSaveable { mutableStateOf("") }
-    var showPassword by rememberSaveable { mutableStateOf(false) }
+    // Form state from ViewModel
+    val selectedId by vm.selectedUserId.collectAsState()
+    val passwordText by vm.password.collectAsState()
+    val showPassword by vm.showPassword.collectAsState()
+    val dropdownExpanded by vm.dropdownExpanded.collectAsState()
 
     // Navigate on success
     LaunchedEffect(loginSuccess) {
@@ -164,17 +164,17 @@ fun LoginScreen(
         selectedId = selectedId,
         passwordText = passwordText,
         showPassword = showPassword,
-        onDropdownExpandedChange = { dropdownExpanded = it },
-        onSelectedIdChange = { selectedId = it },
-        onPasswordTextChange = { passwordText = it },
-        onShowPasswordChange = { showPassword = it },
-        onLogin = { vm.validateAndLogin(selectedId, passwordText) },
+        onDropdownExpandedChange = vm::updateDropdownExpanded,
+        onSelectedIdChange = vm::updateSelectedUserId,
+        onPasswordTextChange = vm::updatePassword,
+        onShowPasswordChange = vm::updateShowPassword,
+        onLogin = { vm.validateAndLogin() },
         onRegister = onRegister,
         onForgotPassword = { navController.navigate(Screen.ForgotPassword.route) }
     )
 }
 
-// Shared UI content to avoid duplication
+// Shared UI content with LazyColumn for proper scrolling and rotation handling
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun LoginScreenContent(
@@ -198,171 +198,183 @@ private fun LoginScreenContent(
         modifier = Modifier.fillMaxSize(),
         color = Color(0xFFF8F5F5)
     ) {
-        // Top green header with image
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(500.dp)
-                .background(Color(0xFFC1FF72))
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.onboarding),
-                contentDescription = "Main logo",
-                modifier = Modifier.aspectRatio(0.7f),
-                contentScale = ContentScale.Crop
-            )
-        }
-
-        // White card with rounded top corners
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 380.dp)
-                .clip(RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp))
-                .background(Color.White)
-                .padding(horizontal = 16.dp, vertical = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top
-        ) {
-            Text(
-                text = "Log in",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
-            Spacer(Modifier.height(24.dp))
-
-            // User ID dropdown
-            ExposedDropdownMenuBox(
-                expanded = dropdownExpanded,
-                onExpandedChange = onDropdownExpandedChange
-            ) {
-                OutlinedTextField(
-                    value = selectedId,
-                    onValueChange = onSelectedIdChange,
-                    label = { Text("My ID (Provided by your Clinician)") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    isError = errorMessage != null && !notRegistered,
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(dropdownExpanded)
-                    },
+            // Top green header with image
+            item {
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .menuAnchor()
-                )
-                ExposedDropdownMenu(
-                    expanded = dropdownExpanded,
-                    onDismissRequest = { onDropdownExpandedChange(false) }
+                        .height(500.dp)
+                        .background(Color(0xFFC1FF72))
                 ) {
-                    userIds.forEach { id ->
-                        DropdownMenuItem(
-                            text = { Text(id) },
-                            onClick = {
-                                onSelectedIdChange(id)
-                                onDropdownExpandedChange(false)
-                            }
-                        )
-                    }
-                }
-            }
-
-            // Error messages
-            if (errorMessage != null && !notRegistered) {
-                Text(
-                    text = errorMessage,
-                    color = MaterialTheme.colorScheme.error,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(start = 8.dp, top = 4.dp)
-                )
-            }
-            if (notRegistered) {
-                TextButton(onClick = onRegister) {
-                    Text(
-                        "Please Complete Self Registration",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.error
+                    Image(
+                        painter = painterResource(id = R.drawable.onboarding),
+                        contentDescription = "Main logo",
+                        modifier = Modifier.aspectRatio(0.7f),
+                        contentScale = ContentScale.Crop
                     )
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
-
-            // Password field
-            OutlinedTextField(
-                value = passwordText,
-                onValueChange = onPasswordTextChange,
-                label = { Text("Password") },
-                visualTransformation = if (showPassword)
-                    VisualTransformation.None
-                else
-                    PasswordVisualTransformation(),
-                trailingIcon = {
-                    IconButton(onClick = { onShowPasswordChange(!showPassword) }) {
-                        Icon(
-                            imageVector = if (showPassword)
-                                Icons.Filled.Visibility
-                            else
-                                Icons.Filled.VisibilityOff,
-                            contentDescription = if (showPassword) "Hide password" else "Show password"
-                        )
-                    }
-                },
-                isError = errorMessage != null && !notRegistered,
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
-            )
-
-            Spacer(Modifier.height(24.dp))
-
-            // Continue button
-            Button(
-                onClick = onLogin,
-                enabled = !isLoading && selectedId.isNotBlank() && passwordText.isNotBlank(),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72))
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
+            // White card content
+            item {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .offset(y = (-120).dp) // Overlap with the image
+                        .clip(RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp))
+                        .background(Color.White)
+                        .padding(horizontal = 16.dp, vertical = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Top
+                ) {
+                    Text(
+                        text = "Log in",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
                         color = Color.Black
                     )
-                } else {
-                    Text("Continue", color = Color.Black, fontWeight = FontWeight.Medium)
+                    Spacer(Modifier.height(24.dp))
+
+                    // User ID dropdown
+                    ExposedDropdownMenuBox(
+                        expanded = dropdownExpanded,
+                        onExpandedChange = onDropdownExpandedChange
+                    ) {
+                        OutlinedTextField(
+                            value = selectedId,
+                            onValueChange = onSelectedIdChange,
+                            label = { Text("My ID (Provided by your Clinician)") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            isError = errorMessage != null && !notRegistered,
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(dropdownExpanded)
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .menuAnchor()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = dropdownExpanded,
+                            onDismissRequest = { onDropdownExpandedChange(false) }
+                        ) {
+                            userIds.forEach { id ->
+                                DropdownMenuItem(
+                                    text = { Text(id) },
+                                    onClick = {
+                                        onSelectedIdChange(id)
+                                        onDropdownExpandedChange(false)
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    // Error messages
+                    if (errorMessage != null && !notRegistered) {
+                        Text(
+                            text = errorMessage,
+                            color = MaterialTheme.colorScheme.error,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(start = 8.dp, top = 4.dp)
+                        )
+                    }
+                    if (notRegistered) {
+                        TextButton(onClick = onRegister) {
+                            Text(
+                                "Please Complete Self Registration",
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+
+                    Spacer(Modifier.height(16.dp))
+
+                    // Password field
+                    OutlinedTextField(
+                        value = passwordText,
+                        onValueChange = onPasswordTextChange,
+                        label = { Text("Password") },
+                        visualTransformation = if (showPassword)
+                            VisualTransformation.None
+                        else
+                            PasswordVisualTransformation(),
+                        trailingIcon = {
+                            IconButton(onClick = { onShowPasswordChange(!showPassword) }) {
+                                Icon(
+                                    imageVector = if (showPassword)
+                                        Icons.Filled.Visibility
+                                    else
+                                        Icons.Filled.VisibilityOff,
+                                    contentDescription = if (showPassword) "Hide password" else "Show password"
+                                )
+                            }
+                        },
+                        isError = errorMessage != null && !notRegistered,
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                    )
+
+                    Spacer(Modifier.height(24.dp))
+
+                    // Continue button
+                    Button(
+                        onClick = onLogin,
+                        enabled = !isLoading && selectedId.isNotBlank() && passwordText.isNotBlank(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC1FF72))
+                    ) {
+                        if (isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = Color.Black
+                            )
+                        } else {
+                            Text("Continue", color = Color.Black, fontWeight = FontWeight.Medium)
+                        }
+                    }
+
+                    Spacer(Modifier.height(12.dp))
+
+                    // Forgot Password link
+                    TextButton(onClick = onForgotPassword) {
+                        Text(
+                            "Forgot Password?",
+                            fontSize = 14.sp,
+                            color = Color(0xFF137A44),
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+
+                    Spacer(Modifier.height(8.dp))
+
+                    Text(
+                        text = "Haven't Registered Already?",
+                        fontSize = 12.sp,
+                        color = Color.Gray,
+                        modifier = Modifier.padding(8.dp)
+                    )
+
+                    // Register button
+                    Button(
+                        onClick = onRegister,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF8F5F5))
+                    ) {
+                        Text("Register", color = Color.Black, fontWeight = FontWeight.Medium)
+                    }
+
+                    // Extra padding to ensure nothing gets cut off
+                    Spacer(Modifier.height(16.dp))
                 }
-            }
-
-            Spacer(Modifier.height(12.dp))
-
-            // Forgot Password link - Always visible now
-            TextButton(onClick = onForgotPassword) {
-                Text(
-                    "Forgot Password?",
-                    fontSize = 14.sp,
-                    color = Color(0xFF137A44),
-                    fontWeight = FontWeight.Medium
-                )
-            }
-
-            Spacer(Modifier.height(8.dp))
-
-            Text(
-                text = "Haven't Registered Already?",
-                fontSize = 12.sp,
-                color = Color.Gray,
-                modifier = Modifier.padding(8.dp)
-            )
-
-            // Register button
-            Button(
-                onClick = onRegister,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF8F5F5))
-            ) {
-                Text("Register", color = Color.Black, fontWeight = FontWeight.Medium)
             }
         }
     }
