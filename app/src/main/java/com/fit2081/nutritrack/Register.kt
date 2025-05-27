@@ -33,7 +33,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.fit2081.nutritrack.Feature.RegisterViewModel
 import com.fit2081.nutritrack.data.AppDatabase
 import com.fit2081.nutritrack.data.Repo.AuthRepository
 import com.fit2081.nutritrack.ui.theme.NutritrackTheme
@@ -66,6 +66,7 @@ Architecture Components:
 
 Credit: Implementation follows Android Architecture Components guidelines
 Reference: https://developer.android.com/topic/architecture
+ Credit: Chat GPT in helping in implementation
  */
 class RegisterActivity : ComponentActivity() {
     /**

@@ -19,8 +19,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.fit2081.nutritrack.data.AppDatabase
-import com.fit2081.nutritrack.data.Entity.PatientHealthRecords
+import com.fit2081.nutritrack.Feature.ClinicianDashboardUiState
+import com.fit2081.nutritrack.Feature.ClinicianDashboardViewModel
+import com.fit2081.nutritrack.Feature.ClinicianDashboardViewModelFactory
 import com.fit2081.nutritrack.navigation.Screen
 
 /**

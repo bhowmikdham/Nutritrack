@@ -22,6 +22,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import com.fit2081.nutritrack.Feature.NutriCoachUiState
+import com.fit2081.nutritrack.Feature.NutriCoachViewModel
+import com.fit2081.nutritrack.Feature.NutriCoachViewModelFactory
 import com.fit2081.nutritrack.data.AppDatabase
 import com.fit2081.nutritrack.data.AuthManager
 import com.fit2081.nutritrack.data.Entity.CoachTips

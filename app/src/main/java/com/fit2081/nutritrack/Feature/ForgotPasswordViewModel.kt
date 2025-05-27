@@ -1,4 +1,4 @@
-package com.fit2081.nutritrack
+package com.fit2081.nutritrack.Feature
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

@@ -1,4 +1,4 @@
-package com.fit2081.nutritrack
+package com.fit2081.nutritrack.Feature
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel

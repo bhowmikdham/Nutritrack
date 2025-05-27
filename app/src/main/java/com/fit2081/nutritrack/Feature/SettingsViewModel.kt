@@ -1,10 +1,9 @@
-package com.fit2081.nutritrack
+package com.fit2081.nutritrack.Feature
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.fit2081.nutritrack.data.AuthManager
-import com.fit2081.nutritrack.data.Entity.Patient
 import com.fit2081.nutritrack.data.Repo.AuthRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch

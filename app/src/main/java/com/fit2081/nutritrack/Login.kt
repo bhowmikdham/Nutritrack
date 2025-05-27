@@ -37,6 +37,7 @@ import com.fit2081.nutritrack.data.Repo.AuthRepository
 import com.fit2081.nutritrack.ui.theme.NutritrackTheme
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.fit2081.nutritrack.Feature.AuthViewModel
 import com.fit2081.nutritrack.navigation.Screen
 
 /**

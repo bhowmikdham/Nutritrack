@@ -1,5 +1,5 @@
 // --- InsightsViewModel.kt ---
-package com.fit2081.nutritrack
+package com.fit2081.nutritrack.Feature
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.fit2081.nutritrack.data.AppDatabase
 import com.fit2081.nutritrack.data.AuthManager
-import com.fit2081.nutritrack.data.Entity.PatientHealthRecords
 import com.fit2081.nutritrack.data.Repo.HealthRecordsRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch

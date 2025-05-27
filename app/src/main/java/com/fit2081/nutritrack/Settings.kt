@@ -15,6 +15,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.fit2081.nutritrack.Feature.SettingsViewModel
+import com.fit2081.nutritrack.Feature.SettingsViewModelFactory
 import com.fit2081.nutritrack.data.AppDatabase
 import com.fit2081.nutritrack.data.Repo.AuthRepository
 import com.fit2081.nutritrack.navigation.Screen

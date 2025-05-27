@@ -33,8 +33,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.fit2081.nutritrack.QuestionnaireViewModel.FoodintakeState
-import com.fit2081.nutritrack.QuestionnaireViewModel.QuestionnaireViewModel
+import com.fit2081.nutritrack.Feature.FoodintakeState
+import com.fit2081.nutritrack.Feature.QuestionnaireViewModel
 import com.fit2081.nutritrack.data.AppDatabase
 import com.fit2081.nutritrack.data.Repo.IntakeRepository
 import com.fit2081.nutritrack.navigation.Screen

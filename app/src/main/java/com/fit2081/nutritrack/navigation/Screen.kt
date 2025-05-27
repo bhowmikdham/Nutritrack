@@ -1,7 +1,6 @@
 package com.fit2081.nutritrack.navigation
 
 import android.content.Context
-import android.content.Intent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -18,13 +17,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.fit2081.nutritrack.*
-import com.fit2081.nutritrack.QuestionnaireViewModel.QuestionnaireViewModel
-import com.fit2081.nutritrack.QuestionnaireViewModel.QuestionnaireViewModelFactory
+import com.fit2081.nutritrack.Feature.AuthViewModel
+import com.fit2081.nutritrack.Feature.RegisterViewModel
+import com.fit2081.nutritrack.Feature.QuestionnaireViewModel
+import com.fit2081.nutritrack.Feature.QuestionnaireViewModelFactory
 import com.fit2081.nutritrack.data.AppDatabase
 import com.fit2081.nutritrack.data.Repo.AuthRepository
 import com.fit2081.nutritrack.data.Repo.IntakeRepository
-import com.fit2081.nutritrack.data.Repo.CoachTipsRepository
-import com.fit2081.nutritrack.data.AuthManager
 
 sealed class Screen(val route: String) {
     object Welcome           : Screen("welcome")

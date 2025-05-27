@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.material3.TopAppBarDefaults.centerAlignedTopAppBarColors
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,7 +21,9 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.ui.draw.clip
 import androidx.navigation.NavHostController
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.fit2081.nutritrack.navigation.Screen
+import com.fit2081.nutritrack.Feature.InsightsViewModel
+import com.fit2081.nutritrack.Feature.InsightsViewModelFactory
+import com.fit2081.nutritrack.Feature.NutrientUiModel
 
 /**
    Insights Screen - Nutrition Score Display

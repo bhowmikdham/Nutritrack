@@ -26,6 +26,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.fit2081.nutritrack.Feature.ForgotPasswordStep
+import com.fit2081.nutritrack.Feature.ForgotPasswordUiState
+import com.fit2081.nutritrack.Feature.ForgotPasswordViewModel
+import com.fit2081.nutritrack.Feature.ForgotPasswordViewModelFactory
 import com.fit2081.nutritrack.data.AppDatabase
 import com.fit2081.nutritrack.data.Repo.AuthRepository
 import com.fit2081.nutritrack.navigation.Screen
@@ -35,6 +39,8 @@ Forgot Password Screen with Multi-Step Flow
 
 Implements a secure password reset process with user verification
 Features step-by-step UI with progress indicators and comprehensive validation
+ Credit: GEN AI for helping in implementation
+
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
